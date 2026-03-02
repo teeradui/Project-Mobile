@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>แอปนี้ต้องการเข้าถึงไมโครโฟนเพื่อรับคำสั่งด้วยเสียงสำหรับเพิ่มวัตถุดิบ</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>แอปนี้ต้องการใช้การรู้จำเสียงเพื่อแปลงคำพูดเป็นข้อความ</string>
 </dict>
 </plist>
