@@ -21,18 +21,29 @@ class _GroceryPageState extends State<GroceryPage> {
     _speech = stt.SpeechToText();
   }
 
-  // 🎤 Start voice input
   Future<void> _startListening() async {
-    bool available = await _speech.initialize();
-    if (available) {
-      setState(() => _isListening = true);
-      _speech.listen(onResult: (result) {
-        _textController.text = result.recognizedWords;
-      });
+    bool available = await _speech.initialize(
+      onStatus: (status) => debugPrint('Speech status: $status'),
+      onError: (error) => debugPrint('Speech error: $error'),
+    );
+
+    if (!available) {
+      debugPrint('Speech not available');
+      return;
     }
+
+    setState(() => _isListening = true);
+
+    await _speech.listen(
+      localeId: 'en_US', // เปลี่ยนเป็น en_US ถ้าพูดอังกฤษ
+      onResult: (result) {
+        setState(() {
+          _textController.text = result.recognizedWords;
+        });
+      },
+    );
   }
 
-  // ⏹ Stop voice input
   void _stopListening() {
     _speech.stop();
     setState(() => _isListening = false);
@@ -62,8 +73,13 @@ class _GroceryPageState extends State<GroceryPage> {
               decoration: InputDecoration(
                 labelText: 'พิมพ์หรือพูดรายการของ',
                 suffixIcon: IconButton(
-                  icon: Icon(_isListening ? Icons.mic : Icons.mic_none),
-                  onPressed: _isListening ? _stopListening : _startListening,
+                  icon: Icon(
+                    _isListening ? Icons.mic : Icons.mic_none,
+                    color: _isListening ? Colors.red : Colors.grey,
+                  ),
+                  onPressed: () {
+                    _isListening ? _stopListening() : _startListening();
+                  },
                 ),
               ),
             ),
