@@ -5,7 +5,7 @@ class ApiConfig {
   static const String geminiApiKey = 'AIzaSyDm82-gONGji37YPSafRDVDI2rwnAmxWlE';
 
   /// Spoonacular API Key for ingredient parsing and nutrition
-  static const String spoonacularApiKey = '6640bb7876804f569a369e48949e0fc1';
+  static const String spoonacularApiKey = '27bebe2baaf149449c2c707d07694fc1';
 
   /// API Configuration
   static const String geminiModel = 'gemini-pro';
@@ -20,7 +20,7 @@ class ApiConfig {
   /// Check if Spoonacular API is configured
   static bool get isSpoonacularConfigured =>
       spoonacularApiKey.isNotEmpty &&
-      spoonacularApiKey != '6640bb7876804f569a369e48949e0fc1';
+      spoonacularApiKey != '27bebe2baaf149449c2c707d07694fc1';
 
   /// Check if any API is configured
   static bool get isConfigured => isGeminiConfigured || isSpoonacularConfigured;

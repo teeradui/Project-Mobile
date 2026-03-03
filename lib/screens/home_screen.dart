@@ -1344,3 +1344,312 @@ class _IngredientConfirmationDialog extends StatelessWidget {
   }
 }
 
+/// Unit Selection Dialog
+/// Allows users to manually add ingredients with custom amount and unit
+Future<void> showAddIngredientManuallyDialog(BuildContext context) async {
+  final ingredientController = TextEditingController();
+  final amountController = TextEditingController(text: '1');
+  String selectedUnit = 'pcs';
+
+  return showDialog<void>(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: const Color(0xFF1A1A2E),
+          title: Row(
+            children: [
+              const Icon(Icons.add_circle_outline, color: Colors.green, size: 28),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Add Ingredient Manually',
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      'เพิ่มวัตถุดิบแบบระบุ',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Ingredient name input
+                Text(
+                  'Ingredient Name / ชื่อวัตถุดิบ',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: ingredientController,
+                  decoration: InputDecoration(
+                    hintText: 'e.g., ไก่, chicken, ข้าว',
+                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+                    filled: true,
+                    fillColor: Colors.white.withValues(alpha: 0.05),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: const Icon(Icons.restaurant, color: Colors.orange),
+                  ),
+                  style: const TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 16),
+
+                // Amount input
+                Text(
+                  'Amount / ปริมาณ',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: '1',
+                    filled: true,
+                    fillColor: Colors.white.withValues(alpha: 0.05),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: const Icon(Icons.numbers, color: Colors.blue),
+                  ),
+                  style: const TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 16),
+
+                // Unit selection
+                Text(
+                  'Unit / หน่วย',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.1),
+                    ),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: selectedUnit,
+                      isExpanded: true,
+                      dropdownColor: const Color(0xFF2A2A3E),
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                      icon: const Icon(Icons.arrow_drop_down, color: Colors.orange),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'pcs',
+                          child: Text('Pieces / ชิ้น', style: GoogleFonts.poppins()),
+                        ),
+                        DropdownMenuItem(
+                          value: 'ตัว',
+                          child: Text('ตัว', style: GoogleFonts.poppins()),
+                        ),
+                        DropdownMenuItem(
+                          value: 'g',
+                          child: Text('Grams (g)', style: GoogleFonts.poppins()),
+                        ),
+                        DropdownMenuItem(
+                          value: 'กรัม',
+                          child: Text('กรัม', style: GoogleFonts.poppins()),
+                        ),
+                        DropdownMenuItem(
+                          value: 'kg',
+                          child: Text('Kilograms (kg)', style: GoogleFonts.poppins()),
+                        ),
+                        DropdownMenuItem(
+                          value: 'กิโล',
+                          child: Text('กิโล', style: GoogleFonts.poppins()),
+                        ),
+                        DropdownMenuItem(
+                          value: 'cup',
+                          child: Text('Cup / ถ้วย', style: GoogleFonts.poppins()),
+                        ),
+                        DropdownMenuItem(
+                          value: 'tbsp',
+                          child: Text('Tablespoon / ช้อนโตเที่ยม', style: GoogleFonts.poppins()),
+                        ),
+                        DropdownMenuItem(
+                          value: 'tsp',
+                          child: Text('Teaspoon / ช้อนชา', style: GoogleFonts.poppins()),
+                        ),
+                        DropdownMenuItem(
+                          value: 'ml',
+                          child: Text('Milliliter (ml) / มิลลิลิตร', style: GoogleFonts.poppins()),
+                        ),
+                        DropdownMenuItem(
+                          value: 'liter',
+                          child: Text('Liter / ลิตร', style: GoogleFonts.poppins()),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          selectedUnit = value!;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Quick unit buttons
+                Text(
+                  'Quick Select / เลือกด่วน',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildQuickUnitButton('pcs', 'ชิ้น', selectedUnit, (unit) {
+                      setState(() => selectedUnit = unit);
+                    }),
+                    _buildQuickUnitButton('g', 'กรัม', selectedUnit, (unit) {
+                      setState(() => selectedUnit = unit);
+                    }),
+                    _buildQuickUnitButton('kg', 'กิโล', selectedUnit, (unit) {
+                      setState(() => selectedUnit = unit);
+                    }),
+                    _buildQuickUnitButton('cup', 'ถ้วย', selectedUnit, (unit) {
+                      setState(() => selectedUnit = unit);
+                    }),
+                    _buildQuickUnitButton('ตัว', 'ตัว', selectedUnit, (unit) {
+                      setState(() => selectedUnit = unit);
+                    }),
+                    _buildQuickUnitButton('หัว', 'หัว', selectedUnit, (unit) {
+                      setState(() => selectedUnit = unit);
+                    }),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton.icon(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.close, size: 18),
+              label: const Text('Cancel / ยกเลิก'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey.shade400,
+              ),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                if (ingredientController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Please enter ingredient name / กรุณาใส่่ชื่อวัตถุดิบ',
+                        style: GoogleFonts.poppins(),
+                      ),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                final amount = double.tryParse(amountController.text) ?? 1.0;
+
+                final provider = context.read<GroceryProvider>();
+                final item = GroceryItem(
+                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                  name: ingredientController.text.trim(),
+                  amount: amount,
+                  unit: selectedUnit,
+                );
+
+                provider.addItemManually(item);
+                Navigator.pop(context);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Added ${ingredientController.text} ($amount $selectedUnit) / เพิ่ม ${ingredientController.text} ($amount $selectedUnit) แล้ว',
+                      style: GoogleFonts.poppins(),
+                    ),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add_circle, size: 18),
+              label: const Text('Add / เพิ่ม'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+              ),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
+/// Build quick unit selection button
+Widget _buildQuickUnitButton(
+  String unitValue,
+  String label,
+  String selectedUnit,
+  Function(String) onTap,
+) {
+  final isSelected = selectedUnit == unitValue;
+  return OutlinedButton(
+    onPressed: () => onTap(unitValue),
+    style: OutlinedButton.styleFrom(
+      backgroundColor: isSelected ? Colors.orange.withValues(alpha: 0.2) : Colors.transparent,
+      foregroundColor: isSelected ? Colors.orange : Colors.white.withValues(alpha: 0.6),
+      side: BorderSide(
+        color: isSelected ? Colors.orange : Colors.white.withValues(alpha: 0.3),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    ),
+    child: Text(
+      label,
+      style: GoogleFonts.poppins(fontSize: 11),
+    ),
+  );
+}
+

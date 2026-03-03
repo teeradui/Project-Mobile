@@ -5,6 +5,7 @@ import '../models/grocery_item.dart';
 import '../models/recipe.dart';
 import '../services/ai_service.dart';
 import '../services/voice_service.dart';
+import '../services/spoonacular_service.dart';
 import '../config/api_config.dart';
 
 /// Ingredient & Recipe Provider
@@ -14,10 +15,15 @@ class GroceryProvider extends ChangeNotifier {
   final List<GroceryItem> _items = [];
   bool _isLoading = false;
   String _errorMessage = '';
+  bool _isLoadingRecipes = false;
 
   // Services
   final AIService _aiService = AIService();
   final VoiceService _voiceService = VoiceService();
+  final SpoonacularService _spoonacularService = SpoonacularService();
+
+  // Recipe state - can be local Recipe or SpoonacularRecipe
+  final List<dynamic> _fetchedRecipes = [];
 
   // Getters
   List<GroceryItem> get items => List.unmodifiable(_items);
@@ -26,19 +32,21 @@ class GroceryProvider extends ChangeNotifier {
   int get totalItems => _items.length;
   int get purchasedCount => _items.where((item) => item.isPurchased).length;
   bool get isLoading => _isLoading;
+  bool get isLoadingRecipes => _isLoadingRecipes;
   String get errorMessage => _errorMessage;
   bool get hasItems => _items.isNotEmpty;
 
   // Voice Service getter for UI access
   VoiceService get voiceService => _voiceService;
 
-  // Recipe suggestions
-  List<Recipe> get matchingRecipes {
-    final ingredientNames = unpurchasedItems.map((e) => e.name).toList();
-    return RecipeDatabase.getMatchingRecipes(ingredientNames);
-  }
+  // Spoonacular Service getter
+  SpoonacularService get spoonacularService => _spoonacularService;
+
+  // Recipe suggestions (hybrid: API first, fallback to local)
+  List<dynamic> get matchingRecipes => _fetchedRecipes.isNotEmpty ? _fetchedRecipes : RecipeDatabase.getMatchingRecipes(unpurchasedItems.map((e) => e.name).toList());
 
   int get recipeCount => matchingRecipes.length;
+  String? get apiError => _spoonacularService.errorMessage.isNotEmpty ? _spoonacularService.errorMessage : null;
 
   // Category breakdown
   Map<GroceryCategory, List<GroceryItem>> get itemsByCategory {
@@ -307,6 +315,295 @@ class GroceryProvider extends ChangeNotifier {
     _voiceService.dispose();
     _aiService.dispose();
     super.dispose();
+  }
+
+  /// Fetch recipes from Spoonacular API (Hybrid approach)
+  /// Falls back to local database if API fails or quota exceeded
+  Future<void> fetchRecipesFromAPI() async {
+    if (unpurchasedItems.isEmpty) {
+      _errorMessage = 'กรุณาเพิ่มวัตถุดิบก่อน / Please add ingredients first';
+      notifyListeners();
+      return;
+    }
+
+    _isLoadingRecipes = true;
+    _errorMessage = '';
+    notifyListeners();
+
+    try {
+      final ingredientNames = unpurchasedItems.map((e) => e.name).toList();
+
+      debugPrint('📝 Fetching recipes for ingredients: $ingredientNames');
+
+      // Try to fetch from API
+      final apiRecipes = await _spoonacularService.findByIngredients(
+        ingredientNames,
+        number: 10,
+        ranking: true,
+      );
+
+      debugPrint('📊 API returned ${apiRecipes.length} recipes');
+      debugPrint('📊 API Error message: "${_spoonacularService.errorMessage}"');
+
+      // Check if API call was successful (no error message)
+      final apiCallSuccessful = _spoonacularService.errorMessage.isEmpty;
+
+      if (apiCallSuccessful) {
+        // API successful - use API recipes (even if empty)
+        _fetchedRecipes.clear();
+        _fetchedRecipes.addAll(apiRecipes);
+        _errorMessage = ''; // Clear error - API worked
+
+        debugPrint('✅ API call successful - stored ${apiRecipes.length} recipes');
+        if (apiRecipes.isNotEmpty) {
+          debugPrint('✅ First recipe: ${apiRecipes[0].title}');
+        }
+      } else {
+        // API failed or quota exceeded - fallback to local database
+        _fetchedRecipes.clear();
+        _errorMessage = 'ใช้สูตรอาหารแบบออฟไลน์ ${_spoonacularService.errorMessage}';
+        debugPrint('❌ API call failed: $_errorMessage');
+      }
+
+      _isLoadingRecipes = false;
+      notifyListeners();
+    } catch (e) {
+      // Fallback to local database on any error
+      debugPrint('💥 Exception in fetchRecipesFromAPI: $e');
+      _fetchedRecipes.clear();
+      _errorMessage = 'ใช้สูตรอาหารแบบออฟไลน์ ข้อผิดพลาด: $e';
+      _isLoadingRecipes = false;
+      notifyListeners();
+    }
+  }
+
+  /// Clear API error and fallback message
+  void clearApiError() {
+    _spoonacularService.clearError();
+    if (_errorMessage.contains('ใช้สูตรอาหารแบบออฟไลน์') || _errorMessage.contains('Using offline recipes')) {
+      _errorMessage = '';
+    }
+    notifyListeners();
+  }
+
+  /// Get recipe detail (handles both Recipe and SpoonacularRecipe types)
+  Future<Map<String, dynamic>?> getRecipeDetail(dynamic recipe) async {
+    if (recipe is SpoonacularRecipe) {
+      // Fetch detailed info from API
+      final detail = await _spoonacularService.getRecipeInfo(recipe.id);
+      if (detail != null) {
+        return {
+          'title': detail.title,
+          'image': detail.image,
+          'instructions': detail.instructions,
+          'cookingTime': detail.readyInMinutes,
+          'difficulty': detail.difficulty,
+          'calories': detail.totalCalories,
+          'calorieBreakdown': detail.getCalorieBreakdown(),
+          'ingredients': detail.extendedIngredients.map((e) => e.name).toList(),
+          'usedIngredients': recipe.usedIngredients.map((e) => e.name).toList(),
+          'missedIngredients': recipe.missedIngredients.map((e) => e.name).toList(),
+          'isFromAPI': true,
+        };
+      } else {
+        // Fallback: Use estimated calories if API fails
+        final estimatedCalories = _estimateCaloriesFromIngredients(
+          recipe.usedIngredients,
+          recipe.missedIngredients,
+        );
+        return {
+          'title': recipe.title,
+          'image': recipe.image,
+          'instructions': 'Recipe instructions available on Spoonacular.',
+          'cookingTime': 30,
+          'difficulty': 'Medium',
+          'calories': estimatedCalories,
+          'calorieBreakdown': _estimateCategoryBreakdown(
+            recipe.usedIngredients,
+            recipe.missedIngredients,
+          ),
+          'ingredients': recipe.usedIngredients.map((e) => e.name).toList() +
+                          recipe.missedIngredients.map((e) => e.name).toList(),
+          'usedIngredients': recipe.usedIngredients.map((e) => e.name).toList(),
+          'missedIngredients': recipe.missedIngredients.map((e) => e.name).toList(),
+          'isFromAPI': true,
+        };
+      }
+    }
+
+    // Return local recipe data
+    if (recipe is Recipe) {
+      return {
+        'title': recipe.name,
+        'titleThai': recipe.nameThai,
+        'image': recipe.imageUrl,
+        'instructions': recipe.instructions,
+        'instructionsThai': recipe.instructionsThai,
+        'cookingTime': recipe.cookingTime,
+        'difficulty': recipe.difficulty,
+        'calories': recipe.getTotalCalories(),
+        'calorieBreakdown': recipe.getCalorieBreakdown(),
+        'ingredients': recipe.ingredients,
+        'isFromAPI': false,
+      };
+    }
+
+    return null;
+  }
+
+  /// Estimate total calories from ingredients
+  int _estimateCaloriesFromIngredients(
+    List<SpoonacularIngredient> usedIngredients,
+    List<SpoonacularIngredient> missedIngredients,
+  ) {
+    int total = 0;
+
+    // Estimate for used ingredients (assume standard serving)
+    for (var ing in usedIngredients) {
+      total += _getIngredientCalories(ing.name, ing.amount ?? 100, ing.unit ?? 'g');
+    }
+
+    // Add estimate for missed ingredients
+    for (var ing in missedIngredients) {
+      total += _getIngredientCalories(ing.name, ing.amount ?? 100, ing.unit ?? 'g');
+    }
+
+    return total;
+  }
+
+  /// Estimate category breakdown
+  Map<String, int> _estimateCategoryBreakdown(
+    List<SpoonacularIngredient> usedIngredients,
+    List<SpoonacularIngredient> missedIngredients,
+  ) {
+    final breakdown = <String, int>{
+      'Protein': 0,
+      'Carbs': 0,
+      'Vegetables': 0,
+      'Dairy': 0,
+      'Others': 0,
+    };
+
+    // Process all ingredients
+    final allIngredients = [...usedIngredients, ...missedIngredients];
+    for (var ing in allIngredients) {
+      final calories = _getIngredientCalories(ing.name, ing.amount ?? 100, ing.unit ?? 'g');
+      final category = _getIngredientCategory(ing.name);
+      breakdown[category] = (breakdown[category] ?? 0) + calories;
+    }
+
+    // Remove categories with zero calories
+    breakdown.removeWhere((key, value) => value == 0);
+
+    return breakdown;
+  }
+
+  /// Get estimated calories for an ingredient
+  int _getIngredientCalories(String name, double amount, String unit) {
+    // Simple calorie database (per 100g)
+    final calorieMap = {
+      // Protein
+      'chicken': 165, 'beef': 250, 'pork': 242, 'fish': 140, 'shrimp': 99,
+      'salmon': 208, 'tuna': 130, 'crab': 97, 'prawn': 99, 'bacon': 541, 'ham': 145,
+      'egg': 155, 'tofu': 76,
+
+      // Dairy
+      'milk': 42, 'cheese': 402, 'butter': 717, 'cream': 340, 'yogurt': 59,
+      'coconut milk': 197,
+
+      // Vegetables
+      'tomato': 18, 'onion': 40, 'garlic': 149, 'carrot': 41, 'potato': 77,
+      'broccoli': 34, 'lettuce': 15, 'spinach': 23, 'mushroom': 22,
+      'cabbage': 25, 'beans': 347, 'pepper': 31,
+
+      // Carbs
+      'rice': 130, 'pasta': 131, 'bread': 265, 'flour': 364,
+      'noodle': 138, 'oats': 389,
+
+      // Fruits
+      'apple': 52, 'banana': 89, 'orange': 47, 'lime': 30, 'lemon': 29,
+
+      // Condiments
+      'oil': 884, 'sugar': 387, 'soy sauce': 60, 'fish sauce': 50,
+      'tamarind': 239, 'peanut': 567,
+    };
+
+    final lower = name.toLowerCase();
+    int kcalPer100g = 100; // Default
+
+    for (var entry in calorieMap.entries) {
+      if (lower.contains(entry.key)) {
+        kcalPer100g = entry.value;
+        break;
+      }
+    }
+
+    // Convert to grams
+    double grams = amount;
+    if (unit.contains('kg') || unit.contains('kilogram')) {
+      grams = amount * 1000;
+    } else if (unit.contains('g') || unit.contains('gram')) {
+      grams = amount;
+    } else if (unit.contains('lb') || unit.contains('pound')) {
+      grams = amount * 453.592;
+    } else if (unit.contains('oz') || unit.contains('ounce')) {
+      grams = amount * 28.3495;
+    } else if (unit.contains('cup')) {
+      grams = amount * 200; // Approximate
+    } else if (unit.contains('tbsp') || unit.contains('tablespoon')) {
+      grams = amount * 15;
+    } else if (unit.contains('tsp') || unit.contains('teaspoon')) {
+      grams = amount * 5;
+    } else if (unit.contains('ml') || unit.contains('milliliter')) {
+      grams = amount; // Approximate for liquids
+    } else if (unit.contains('liter') || unit.contains('l')) {
+      grams = amount * 1000;
+    } else {
+      // Assume pieces = 100g each
+      grams = amount * 100;
+    }
+
+    return ((kcalPer100g * grams) / 100).round();
+  }
+
+  /// Get category for an ingredient
+  String _getIngredientCategory(String ingredientName) {
+    final lower = ingredientName.toLowerCase();
+
+    // Protein
+    if (lower.contains('chicken') || lower.contains('beef') || lower.contains('pork') ||
+        lower.contains('fish') || lower.contains('shrimp') || lower.contains('prawn') ||
+        lower.contains('crab') || lower.contains('salmon') || lower.contains('tuna') ||
+        lower.contains('bacon') || lower.contains('ham') || lower.contains('sausage') ||
+        lower.contains('egg') || lower.contains('tofu')) {
+      return 'Protein';
+    }
+
+    // Carbs
+    if (lower.contains('rice') || lower.contains('pasta') || lower.contains('noodle') ||
+        lower.contains('bread') || lower.contains('flour') || lower.contains('potato') ||
+        lower.contains('corn') || lower.contains('cracker') || lower.contains('tortilla') ||
+        lower.contains('oats')) {
+      return 'Carbs';
+    }
+
+    // Vegetables
+    if (lower.contains('tomato') || lower.contains('onion') || lower.contains('garlic') ||
+        lower.contains('carrot') || lower.contains('broccoli') || lower.contains('cabbage') ||
+        lower.contains('lettuce') || lower.contains('spinach') || lower.contains('mushroom') ||
+        lower.contains('pepper') || lower.contains('cucumber') || lower.contains('beans') ||
+        lower.contains('peas') || lower.contains('herb') || lower.contains('basil') ||
+        lower.contains('lemongrass') || lower.contains('galangal') || lower.contains('chili')) {
+      return 'Vegetables';
+    }
+
+    // Dairy
+    if (lower.contains('milk') || lower.contains('cheese') || lower.contains('butter') ||
+        lower.contains('cream') || lower.contains('yogurt') || lower.contains('coconut')) {
+      return 'Dairy';
+    }
+
+    return 'Others';
   }
 }
 

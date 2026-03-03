@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mobile_project/models/recipe.dart';
 import 'package:mobile_project/screens/grocery_page.dart';
 import 'package:mobile_project/screens/recipe_suggestion_screen.dart';
 import 'package:mobile_project/services/spoonacular_service.dart';

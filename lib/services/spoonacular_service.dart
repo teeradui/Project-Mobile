@@ -51,6 +51,11 @@ class SpoonacularService extends ChangeNotifier {
   static const String _baseUrl = 'api.spoonacular.com';
   static const String _apiVersion = 'v1';
 
+  // Recipe API doesn't use /v1 prefix!
+  // Ingredient API uses: /v1/food/ingredients/...
+  // Recipe API uses: /recipes/... (NO v1 prefix!)
+  static const String _recipeApiVersion = '';
+
   // State
   bool _isLoading = false;
   String _errorMessage = '';
@@ -294,6 +299,198 @@ class SpoonacularService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Find recipes by ingredients from Spoonacular API
+  /// Returns list of recipes that can be made with the given ingredients
+  Future<List<SpoonacularRecipe>> findByIngredients(
+    List<String> ingredients, {
+    int number = 10,
+    bool ranking = true,
+  }) async {
+    if (ingredients.isEmpty) {
+      _errorMessage = 'Ingredients list cannot be empty';
+      notifyListeners();
+      return [];
+    }
+
+    // Check API quota
+    if (!hasQuotaAvailable) {
+      _errorMessage = 'Daily API quota exceeded. Please try again tomorrow.';
+      notifyListeners();
+      return [];
+    }
+
+    _isLoading = true;
+    _errorMessage = '';
+    notifyListeners();
+
+    try {
+      // Properly format ingredients for Spoonacular API
+      // API expects format: apples,+flour,+sugar
+      final ingredientsString = ingredients.map((ing) => ing.trim()).join(',+');
+
+      // Build query parameters - only valid parameters for findByIngredients endpoint
+      final queryParams = <String, String>{
+        'ingredients': ingredientsString,
+        'number': number.toString(),
+        'ranking': ranking ? '1' : '0',
+      };
+
+      final url = Uri.https(_baseUrl, '/$_recipeApiVersion/recipes/findByIngredients', queryParams);
+
+      debugPrint('🔍 API Request URL: $url');
+      debugPrint('🔍 Ingredients: $ingredientsString');
+      debugPrint('🔍 API Key: ${ApiConfig.spoonacularApiKey.substring(0, 10)}...');
+
+      final response = await http.get(
+        url,
+        headers: {'X-API-Key': ApiConfig.spoonacularApiKey},
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw TimeoutException('Recipe search timed out');
+        },
+      );
+
+      debugPrint('📡 API Response Status: ${response.statusCode}');
+      debugPrint('📡 API Response Body length: ${response.body.length}');
+
+      // Increment request count
+      _requestCount++;
+      notifyListeners();
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = jsonDecode(response.body);
+        debugPrint('📦 API Response JSON: ${jsonData.length} items');
+
+        if (jsonData.isNotEmpty) {
+          debugPrint('📦 First item: ${jsonData[0]}');
+        }
+
+        final recipes = jsonData.map((e) => SpoonacularRecipe.fromJson(e)).toList();
+
+        _isLoading = false;
+        _errorMessage = '';
+        notifyListeners();
+
+        debugPrint('✅ Found ${recipes.length} recipes');
+        for (var recipe in recipes) {
+          debugPrint('  - ${recipe.title} (${recipe.matchPercentage.toStringAsFixed(1)}% match)');
+        }
+        return recipes;
+      } else if (response.statusCode == 401) {
+        debugPrint('❌ 401 Unauthorized - Invalid API Key');
+        _errorMessage = 'Invalid API Key';
+        _isLoading = false;
+        notifyListeners();
+        return [];
+      } else if (response.statusCode == 402) {
+        debugPrint('❌ 402 Payment Required - API quota exceeded');
+        _errorMessage = 'API quota exceeded';
+        _isLoading = false;
+        notifyListeners();
+        return [];
+      } else {
+        debugPrint('❌ API Error ${response.statusCode}: ${response.body}');
+        _errorMessage = 'API Error: ${response.statusCode} - ${response.body.substring(0, 200)}';
+        _isLoading = false;
+        notifyListeners();
+        return [];
+      }
+    } on TimeoutException {
+      debugPrint('⏱️ Recipe search timed out');
+      _errorMessage = 'Recipe search timed out';
+      _isLoading = false;
+      notifyListeners();
+      return [];
+    } catch (e) {
+      debugPrint('💥 Find Recipes Error: $e');
+      _errorMessage = 'Error finding recipes: $e';
+      _isLoading = false;
+      notifyListeners();
+      return [];
+    }
+  }
+
+  /// Get detailed recipe information from Spoonacular API
+  /// Returns full recipe details including instructions, nutrition, etc.
+  Future<SpoonacularRecipeDetail?> getRecipeInfo(int recipeId) async {
+    // Check API quota
+    if (!hasQuotaAvailable) {
+      _errorMessage = 'Daily API quota exceeded. Please try again tomorrow.';
+      notifyListeners();
+      return null;
+    }
+
+    _isLoading = true;
+    _errorMessage = '';
+    notifyListeners();
+
+    try {
+      final url = Uri.https(_baseUrl, '/$_recipeApiVersion/recipes/$recipeId/information', {
+        'includeNutrition': 'true',
+      });
+
+      debugPrint('Fetching recipe info for ID: $recipeId');
+
+      final response = await http.get(
+        url,
+        headers: {'X-API-Key': ApiConfig.spoonacularApiKey},
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw TimeoutException('Recipe info request timed out');
+        },
+      );
+
+      // Increment request count
+      _requestCount++;
+      notifyListeners();
+
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        final recipe = SpoonacularRecipeDetail.fromJson(jsonData);
+
+        _isLoading = false;
+        _errorMessage = '';
+        notifyListeners();
+
+        debugPrint('Got recipe info: ${recipe.title}');
+        return recipe;
+      } else if (response.statusCode == 401) {
+        _errorMessage = 'Invalid API Key';
+        _isLoading = false;
+        notifyListeners();
+        return null;
+      } else if (response.statusCode == 402) {
+        _errorMessage = 'API quota exceeded';
+        _isLoading = false;
+        notifyListeners();
+        return null;
+      } else if (response.statusCode == 404) {
+        _errorMessage = 'Recipe not found';
+        _isLoading = false;
+        notifyListeners();
+        return null;
+      } else {
+        _errorMessage = 'API Error: ${response.statusCode}';
+        _isLoading = false;
+        notifyListeners();
+        return null;
+      }
+    } on TimeoutException {
+      _errorMessage = 'Recipe info request timed out';
+      _isLoading = false;
+      notifyListeners();
+      return null;
+    } catch (e) {
+      _errorMessage = 'Error getting recipe info: $e';
+      _isLoading = false;
+      notifyListeners();
+      debugPrint('Get Recipe Info Error: $e');
+      return null;
+    }
+  }
+
   /// Validate ingredient by searching Spoonacular database
   /// Returns search results if ingredient is found, null if not found
   /// Falls back to local validation if API endpoint is not available
@@ -446,7 +643,6 @@ class SpoonacularService extends ChangeNotifier {
       'corn': {'id': 11172, 'name': 'corn', 'aisle': 'Produce', 'image': 'corn.jpg'},
       'beans': {'id': 16020, 'name': 'beans', 'aisle': 'Produce', 'image': 'beans.jpg'},
       'bell pepper': {'id': 11440, 'name': 'bell pepper', 'aisle': 'Produce', 'image': 'pepper.jpg'},
-      'peppers': {'id': 11440, 'name': 'peppers', 'aisle': 'Produce', 'image': 'peppers.jpg'},
 
       // Fruits
       'apple': {'id': 9003, 'name': 'apple', 'aisle': 'Produce', 'image': 'apple.jpg'},
@@ -729,5 +925,317 @@ class IngredientParseResult {
   List<IngredientCategory> get categories {
     return ingredients.map((i) => i.category).toSet().toList()
       ..sort((a, b) => a.label.compareTo(b.label));
+  }
+}
+
+/// Spoonacular Recipe Model
+class SpoonacularRecipe {
+  final int id;
+  final String title;
+  final String image;
+  final String imageType;
+  final int usedIngredientCount;
+  final int missedIngredientCount;
+  final int missedIngredientsCount; // Alias for missedIngredientCount
+  final List<SpoonacularIngredient> usedIngredients;
+  final List<SpoonacularIngredient> missedIngredients;
+  final List<SpoonacularIngredient> unusedIngredients;
+
+  SpoonacularRecipe({
+    required this.id,
+    required this.title,
+    required this.image,
+    required this.imageType,
+    required this.usedIngredientCount,
+    required this.missedIngredientCount,
+    required this.missedIngredientsCount,
+    required this.usedIngredients,
+    required this.missedIngredients,
+    required this.unusedIngredients,
+  });
+
+  factory SpoonacularRecipe.fromJson(Map<String, dynamic> json) {
+    return SpoonacularRecipe(
+      id: json['id'] ?? 0,
+      title: json['title'] ?? 'Unknown Recipe',
+      image: json['image'] ?? '',
+      imageType: json['imageType'] ?? 'jpg',
+      usedIngredientCount: json['usedIngredientCount'] ?? 0,
+      missedIngredientCount: json['missedIngredientCount'] ?? 0,
+      missedIngredientsCount: json['missedIngredientsCount'] ?? json['missedIngredientCount'] ?? 0,
+      usedIngredients: (json['usedIngredients'] as List<dynamic>?)
+              ?.map((e) => SpoonacularIngredient.fromJson(e))
+              .toList() ??
+          [],
+      missedIngredients: (json['missedIngredients'] as List<dynamic>?)
+              ?.map((e) => SpoonacularIngredient.fromJson(e))
+              .toList() ??
+          [],
+      unusedIngredients: (json['unusedIngredients'] as List<dynamic>?)
+              ?.map((e) => SpoonacularIngredient.fromJson(e))
+              .toList() ??
+          [],
+    );
+  }
+
+  /// Calculate match percentage based on used vs total ingredients
+  double get matchPercentage {
+    final total = usedIngredientCount + missedIngredientCount;
+    if (total == 0) return 0.0;
+    return (usedIngredientCount / total) * 100;
+  }
+
+  /// Get list of missed ingredient names
+  List<String> get missingIngredientNames {
+    return missedIngredients.map((e) => e.name).toList();
+  }
+
+  /// Calculate total calories from ingredients
+  int get totalCalories {
+    int total = 0;
+    for (var ing in [...usedIngredients, ...missedIngredients]) {
+      total += _getIngredientCalories(ing.name, ing.amount ?? 100, ing.unit ?? 'g');
+    }
+    return total;
+  }
+
+  /// Get calorie breakdown by category
+  Map<String, int> getCalorieBreakdown() {
+    final breakdown = <String, int>{
+      'Protein': 0,
+      'Carbs': 0,
+      'Vegetables': 0,
+      'Dairy': 0,
+      'Others': 0,
+    };
+
+    for (var ing in [...usedIngredients, ...missedIngredients]) {
+      final calories = _getIngredientCalories(ing.name, ing.amount ?? 100, ing.unit ?? 'g');
+      final category = _getIngredientCategory(ing.name);
+      breakdown[category] = (breakdown[category] ?? 0) + calories;
+    }
+
+    breakdown.removeWhere((key, value) => value == 0);
+    return breakdown;
+  }
+
+  int _getIngredientCalories(String name, double amount, String unit) {
+    final calorieMap = {
+      'chicken': 165, 'beef': 250, 'pork': 242, 'fish': 140, 'shrimp': 99,
+      'egg': 155, 'tofu': 76,
+      'milk': 42, 'cheese': 402, 'butter': 717, 'cream': 340,
+      'tomato': 18, 'onion': 40, 'garlic': 149, 'carrot': 41, 'potato': 77,
+      'broccoli': 34, 'rice': 130, 'pasta': 131, 'bread': 265,
+      'oil': 884, 'sugar': 387,
+    };
+
+    final lower = name.toLowerCase();
+    int kcalPer100g = 100;
+    for (var entry in calorieMap.entries) {
+      if (lower.contains(entry.key)) {
+        kcalPer100g = entry.value;
+        break;
+      }
+    }
+
+    double grams = amount;
+    if (unit.contains('kg')) grams = amount * 1000;
+    else if (unit.contains('g')) grams = amount;
+    else if (unit.contains('cup')) grams = amount * 200;
+    else if (unit.contains('tbsp')) grams = amount * 15;
+    else if (unit.contains('tsp')) grams = amount * 5;
+    else if (unit.contains('ml')) grams = amount;
+    else if (unit.contains('liter')) grams = amount * 1000;
+    else grams = amount * 100;
+
+    return ((kcalPer100g * grams) / 100).round();
+  }
+
+  String _getIngredientCategory(String ingredientName) {
+    final lower = ingredientName.toLowerCase();
+    if (lower.contains('chicken') || lower.contains('beef') || lower.contains('pork') ||
+        lower.contains('fish') || lower.contains('shrimp') || lower.contains('egg') || lower.contains('tofu')) {
+      return 'Protein';
+    }
+    if (lower.contains('rice') || lower.contains('pasta') || lower.contains('bread') || lower.contains('potato')) {
+      return 'Carbs';
+    }
+    if (lower.contains('tomato') || lower.contains('onion') || lower.contains('garlic') ||
+        lower.contains('carrot') || lower.contains('broccoli')) {
+      return 'Vegetables';
+    }
+    if (lower.contains('milk') || lower.contains('cheese') || lower.contains('butter') || lower.contains('cream')) {
+      return 'Dairy';
+    }
+    return 'Others';
+  }
+
+  /// Get recipe difficulty (estimated from ingredients count)
+  String get difficulty {
+    final totalIngredients = usedIngredients.length + missedIngredients.length;
+    if (totalIngredients <= 5) return 'Easy';
+    if (totalIngredients <= 10) return 'Medium';
+    return 'Hard';
+  }
+
+  /// Get available substitutes for missing ingredients
+  /// API recipes don't have substitute information, so return empty map
+  Map<String, List<String>> getAvailableSubstitutes(List<String> availableIngredients) {
+    // Spoonacular API doesn't provide substitute information
+    // Return empty map - substitutes feature only available for local recipes
+    return {};
+  }
+}
+
+/// Spoonacular Ingredient Model
+class SpoonacularIngredient {
+  final int? id;
+  final String name;
+  final double? amount;
+  final String? unit;
+  final String? image;
+
+  SpoonacularIngredient({
+    this.id,
+    required this.name,
+    this.amount,
+    this.unit,
+    this.image,
+  });
+
+  factory SpoonacularIngredient.fromJson(Map<String, dynamic> json) {
+    return SpoonacularIngredient(
+      id: json['id'],
+      name: json['name'] ?? json['original'] ?? 'Unknown',
+      amount: json['amount'] != null ? (json['amount'] as num).toDouble() : null,
+      unit: json['unit'] ?? json['unitLong'] ?? json['unitShort'],
+      image: json['image'],
+    );
+  }
+
+  /// Get formatted amount string
+  String get formattedAmount {
+    if (amount == null) return name;
+    if (amount == amount!.truncateToDouble()) {
+      return '${amount!.toInt()} $unit $name'.trim();
+    }
+    return '$amount $unit $name'.trim();
+  }
+}
+
+/// Extended Spoonacular Recipe with full details
+class SpoonacularRecipeDetail {
+  final int id;
+  final String title;
+  final String image;
+  final String instructions;
+  final int readyInMinutes;
+  final String difficulty;
+  final int totalCalories;
+  final List<SpoonacularIngredient> extendedIngredients;
+
+  SpoonacularRecipeDetail({
+    required this.id,
+    required this.title,
+    required this.image,
+    required this.instructions,
+    required this.readyInMinutes,
+    required this.difficulty,
+    required this.totalCalories,
+    required this.extendedIngredients,
+  });
+
+  factory SpoonacularRecipeDetail.fromJson(Map<String, dynamic> json) {
+    // Calculate calories from nutrition info
+    int calories = 0;
+    if (json['nutrition'] != null && json['nutrition']['nutrients'] != null) {
+      for (var nutrient in json['nutrition']['nutrients']) {
+        if (nutrient['name'] == 'Calories') {
+          calories = (nutrient['amount'] as num).toInt();
+          break;
+        }
+      }
+    }
+
+    return SpoonacularRecipeDetail(
+      id: json['id'] ?? 0,
+      title: json['title'] ?? 'Unknown Recipe',
+      image: json['image'] ?? '',
+      instructions: json['instructions'] ?? 'No instructions available.',
+      readyInMinutes: json['readyInMinutes'] ?? 30,
+      difficulty: 'Medium',
+      totalCalories: calories,
+      extendedIngredients: (json['extendedIngredients'] as List<dynamic>?)
+              ?.map((e) => SpoonacularIngredient.fromJson(e))
+              .toList() ??
+          [],
+    );
+  }
+
+  /// Get calorie breakdown by category
+  Map<String, int> getCalorieBreakdown() {
+    final breakdown = <String, int>{
+      'Protein': 0,
+      'Carbs': 0,
+      'Vegetables': 0,
+      'Dairy': 0,
+      'Others': 0,
+    };
+
+    // Simple calorie estimation (per 100g)
+    final calorieMap = {
+      'chicken': 165, 'beef': 250, 'pork': 242, 'fish': 140, 'shrimp': 99,
+      'egg': 155, 'tofu': 76,
+      'milk': 42, 'cheese': 402, 'butter': 717, 'cream': 340,
+      'tomato': 18, 'onion': 40, 'garlic': 149, 'carrot': 41, 'potato': 77,
+      'broccoli': 34, 'rice': 130, 'pasta': 131, 'bread': 265,
+      'oil': 884, 'sugar': 387,
+    };
+
+    for (var ing in extendedIngredients) {
+      final name = ing.name.toLowerCase();
+      int kcalPer100g = 100;
+
+      for (var entry in calorieMap.entries) {
+        if (name.contains(entry.key)) {
+          kcalPer100g = entry.value;
+          break;
+        }
+      }
+
+      double grams = ing.amount ?? 100;
+      final unit = ing.unit ?? 'g';
+      if (unit.contains('kg')) grams = grams * 1000;
+      else if (unit.contains('cup')) grams = grams * 200;
+      else if (unit.contains('tbsp')) grams = grams * 15;
+      else if (unit.contains('tsp')) grams = grams * 5;
+      else if (!unit.contains('g')) grams = grams * 100;
+
+      final calories = ((kcalPer100g * grams) / 100).round();
+      final category = _getCategoryForIngredient(ing.name);
+      breakdown[category] = (breakdown[category] ?? 0) + calories;
+    }
+
+    breakdown.removeWhere((key, value) => value == 0);
+    return breakdown;
+  }
+
+  String _getCategoryForIngredient(String ingredientName) {
+    final lower = ingredientName.toLowerCase();
+    if (lower.contains('chicken') || lower.contains('beef') || lower.contains('pork') ||
+        lower.contains('fish') || lower.contains('shrimp') || lower.contains('egg') || lower.contains('tofu')) {
+      return 'Protein';
+    }
+    if (lower.contains('rice') || lower.contains('pasta') || lower.contains('bread') || lower.contains('potato')) {
+      return 'Carbs';
+    }
+    if (lower.contains('tomato') || lower.contains('onion') || lower.contains('garlic') ||
+        lower.contains('carrot') || lower.contains('broccoli')) {
+      return 'Vegetables';
+    }
+    if (lower.contains('milk') || lower.contains('cheese') || lower.contains('butter') || lower.contains('cream')) {
+      return 'Dairy';
+    }
+    return 'Others';
   }
 }

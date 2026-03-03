@@ -1,18 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../models/recipe.dart';
+import 'package:mobile_project/screens/home_screen.dart';
+import 'package:provider/provider.dart';
+import '../models/grocery_item.dart';
+import '../providers/grocery_provider.dart';
+import '../widgets/calorie_donut_chart.dart';
 
 /// Recipe Suggestion Screen
-/// Shows recipes based on available ingredients, missing items, and substitutes
-class RecipeSuggestionScreen extends StatelessWidget {
+/// Shows recipes based on available ingredients with API integration
+class RecipeSuggestionScreen extends StatefulWidget {
   final List<String> ingredients;
 
   const RecipeSuggestionScreen({super.key, required this.ingredients});
 
   @override
-  Widget build(BuildContext context) {
-    final matchingRecipes = RecipeDatabase.getMatchingRecipes(ingredients);
+  State<RecipeSuggestionScreen> createState() => _RecipeSuggestionScreenState();
+}
 
+class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
+  bool _isInitialLoad = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch recipes from API after frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchRecipes();
+    });
+  }
+
+  Future<void> _fetchRecipes() async {
+    final provider = context.read<GroceryProvider>();
+    await provider.fetchRecipesFromAPI();
+    if (mounted) {
+      setState(() {
+        _isInitialLoad = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -32,19 +60,27 @@ class RecipeSuggestionScreen extends StatelessWidget {
               _buildHeader(context),
               _buildIngredientsHeader(context),
               Expanded(
-                child: matchingRecipes.isEmpty
-                    ? _buildNoRecipesState(context)
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(20),
-                        itemCount: matchingRecipes.length,
-                        itemBuilder: (context, index) {
-                          return _buildRecipeCard(
-                            context,
-                            matchingRecipes[index],
-                            ingredients,
-                          );
-                        },
-                      ),
+                child: Consumer<GroceryProvider>(
+                  builder: (context, provider, child) {
+                    // Show loading state on initial fetch
+                    if (_isInitialLoad && provider.isLoadingRecipes) {
+                      return _buildLoadingState(context);
+                    }
+
+                    // Show error message if API failed (but still show fallback recipes)
+                    if (provider.apiError != null) {
+                      return Column(
+                        children: [
+                          _buildApiWarning(context, provider.apiError!),
+                          Expanded(child: _buildRecipeList(provider)),
+                        ],
+                      );
+                    }
+
+                    // Show recipes
+                    return _buildRecipeList(provider);
+                  },
+                ),
               ),
             ],
           ),
@@ -53,10 +89,98 @@ class RecipeSuggestionScreen extends StatelessWidget {
     );
   }
 
+  /// Build API warning banner
+  Widget _buildApiWarning(BuildContext context, String message) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.orange.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.orange.withValues(alpha: 0.4),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: GoogleFonts.poppins(
+                color: Colors.orange.shade200,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.orange, size: 16),
+            onPressed: () => context.read<GroceryProvider>().clearApiError(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build recipe list
+  Widget _buildRecipeList(GroceryProvider provider) {
+    final recipes = provider.matchingRecipes;
+
+    if (recipes.isEmpty) {
+      return _buildNoRecipesState(context);
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      itemCount: recipes.length,
+      clipBehavior: Clip.none,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: _buildRecipeCard(
+            context,
+            recipes[index],
+            widget.ingredients,
+          ),
+        );
+      },
+    );
+  }
+
+  /// Build loading state
+  Widget _buildLoadingState(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            width: 50,
+            height: 50,
+            child: CircularProgressIndicator(
+              color: Colors.orange,
+              strokeWidth: 3,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'กำลังค้นหาสูตรอาหาร...\nSearching for recipes...',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Build app header
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Row(
         children: [
           Container(
@@ -66,7 +190,7 @@ class RecipeSuggestionScreen extends StatelessWidget {
             ),
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen())),
             ),
           ),
           const SizedBox(width: 16),
@@ -75,7 +199,7 @@ class RecipeSuggestionScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Recipe Suggestions',
+                  'Recipe Suggestions / สูตรอาหารแนะนำ',
                   style: GoogleFonts.poppins(
                     color: Colors.white,
                     fontSize: 20,
@@ -83,7 +207,7 @@ class RecipeSuggestionScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Based on your available ingredients',
+                  'Based on your available ingredients / จากวัตถุดิบที่คุณมี',
                   style: GoogleFonts.poppins(
                     color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 12,
@@ -100,7 +224,7 @@ class RecipeSuggestionScreen extends StatelessWidget {
   /// Build ingredients header
   Widget _buildIngredientsHeader(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -119,7 +243,7 @@ class RecipeSuggestionScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Your Ingredients (${ingredients.length})',
+            'Your Ingredients (${widget.ingredients.length}) / วัตถุดิบของคุณ',
             style: GoogleFonts.poppins(
               color: Colors.white,
               fontSize: 14,
@@ -130,7 +254,7 @@ class RecipeSuggestionScreen extends StatelessWidget {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: ingredients
+            children: widget.ingredients
                 .map((ingredient) => Chip(
                       label: Text(
                         ingredient,
@@ -164,7 +288,7 @@ class RecipeSuggestionScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'No matching recipes found',
+            'No matching recipes found / ไม่พบสูตรที่ตรงกัน',
             style: GoogleFonts.poppins(
               color: Colors.white.withValues(alpha: 0.5),
               fontSize: 18,
@@ -173,7 +297,7 @@ class RecipeSuggestionScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Try adding more ingredients',
+            'Try adding more ingredients / ลองเพิ่มวัตถุดิบเพิ่มเติม',
             style: GoogleFonts.poppins(
               color: Colors.white.withValues(alpha: 0.3),
               fontSize: 14,
@@ -184,15 +308,45 @@ class RecipeSuggestionScreen extends StatelessWidget {
     );
   }
 
-  /// Build recipe card
+  /// Build recipe card (handles both Recipe and SpoonacularRecipe)
   Widget _buildRecipeCard(
     BuildContext context,
-    Recipe recipe,
+    dynamic recipe,
     List<String> availableIngredients,
   ) {
-    final matchPercentage = recipe.getMatchPercentage(availableIngredients);
-    final missingIngredients = recipe.getMissingIngredients(availableIngredients);
-    final availableSubstitutes = recipe.getAvailableSubstitutes(availableIngredients);
+    // Determine recipe type and extract data
+    final isSpoonacular = recipe.runtimeType.toString().contains('Spoonacular');
+
+    String name;
+    String nameThai = '';
+    String imageUrl;
+    double matchPercentage;
+    List<String> missingIngredients;
+    int cookingTime;
+    String difficulty;
+    int? calories;
+
+    if (isSpoonacular) {
+      name = recipe.title;
+      imageUrl = recipe.image;
+      matchPercentage = recipe.matchPercentage;
+      missingIngredients = recipe.missingIngredientNames;
+      cookingTime = 30; // Not provided by basic API
+      difficulty = recipe.difficulty;
+
+      // Estimate calories from ingredients
+      calories = recipe.totalCalories;
+    } else {
+      name = recipe.name;
+      nameThai = recipe.nameThai;
+      imageUrl = recipe.imageUrl;
+      matchPercentage = recipe.getMatchPercentage(availableIngredients);
+      missingIngredients = recipe.getMissingIngredients(availableIngredients);
+      cookingTime = recipe.cookingTime;
+      difficulty = recipe.difficulty;
+      calories = recipe.getTotalCalories();
+    }
+
     final isPerfectMatch = missingIngredients.isEmpty;
 
     Color matchColor;
@@ -244,7 +398,6 @@ class RecipeSuggestionScreen extends StatelessWidget {
             recipe,
             availableIngredients,
             missingIngredients,
-            availableSubstitutes,
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -253,52 +406,143 @@ class RecipeSuggestionScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
+                    // Recipe image if available
+                    if (imageUrl.isNotEmpty)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          imageUrl,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.restaurant,
+                                color: Colors.white24,
+                                size: 40,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    if (imageUrl.isNotEmpty) const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            recipe.name,
+                            name,
                             style: GoogleFonts.poppins(
                               color: Colors.white,
-                              fontSize: 20,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            recipe.nameThai,
-                            style: GoogleFonts.poppins(
-                              color: Colors.white.withValues(alpha: 0.6),
-                              fontSize: 14,
+                          if (nameThai.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                nameThai,
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white.withValues(alpha: 0.6),
+                                  fontSize: 13,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: matchColor.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: matchColor),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            '${matchPercentage.toInt()}%',
-                            style: GoogleFonts.poppins(
-                              color: matchColor,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            'Match',
-                            style: GoogleFonts.poppins(
-                              color: matchColor,
-                              fontSize: 10,
-                            ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: matchColor.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: matchColor, width: 1),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      '${matchPercentage.toInt()}% Match',
+                                      style: GoogleFonts.poppins(
+                                        color: matchColor,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    if (missingIngredients.isNotEmpty) ...[
+                                      const SizedBox(width: 3),
+                                      Text(
+                                        '(${missingIngredients.length} ขาด)',
+                                        style: GoogleFonts.poppins(
+                                          color: matchColor.withValues(alpha: 0.7),
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                              if (calories != null)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: Colors.blue, width: 1),
+                                  ),
+                                  child: Text(
+                                    '$calories kcal',
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.blue.shade300,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              if (isSpoonacular)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.purple.withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.purple.withValues(alpha: 0.4),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.cloud,
+                                        size: 12,
+                                        color: Colors.purple,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'API',
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.purple.shade300,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
                           ),
                         ],
                       ),
@@ -306,6 +550,7 @@ class RecipeSuggestionScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
+                // Recipe metadata
                 Row(
                   children: [
                     const Icon(
@@ -315,7 +560,7 @@ class RecipeSuggestionScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '${recipe.cookingTime} min',
+                      '$cookingTime min',
                       style: GoogleFonts.poppins(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 13,
@@ -329,7 +574,7 @@ class RecipeSuggestionScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      recipe.difficulty,
+                      difficulty,
                       style: GoogleFonts.poppins(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 13,
@@ -339,10 +584,7 @@ class RecipeSuggestionScreen extends StatelessWidget {
                 ),
                 if (missingIngredients.isNotEmpty) ...[
                   const SizedBox(height: 12),
-                  _buildMissingIngredients(
-                    missingIngredients,
-                    availableSubstitutes,
-                  ),
+                  _buildMissingIngredients(missingIngredients, recipe.getAvailableSubstitutes(availableIngredients)),
                 ],
               ],
             ),
@@ -379,7 +621,7 @@ class RecipeSuggestionScreen extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                'Missing ${missing.length} ingredient${missing.length > 1 ? "s" : ""}',
+                'Missing ${missing.length} ingredient${missing.length > 1 ? "s" : ""} / ขาด ${missing.length} รายการ',
                 style: GoogleFonts.poppins(
                   color: Colors.orange.shade300,
                   fontSize: 12,
@@ -408,7 +650,7 @@ class RecipeSuggestionScreen extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(left: 16),
                       child: Text(
-                        'Can substitute with: ${availableSubs.join(", ")}',
+                        'Can substitute with: ${availableSubs.join(", ")} / สามารถใช้แทนได้: ${availableSubs.join(", ")}',
                         style: GoogleFonts.poppins(
                           color: Colors.green.shade300,
                           fontSize: 11,
@@ -427,11 +669,56 @@ class RecipeSuggestionScreen extends StatelessWidget {
   /// Show recipe detail bottom sheet
   void _showRecipeDetail(
     BuildContext context,
-    Recipe recipe,
+    dynamic recipe,
     List<String> availableIngredients,
     List<String> missingIngredients,
-    Map<String, List<String>> availableSubstitutes,
-  ) {
+  ) async {
+    // Store scaffold messenger before async call
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    // Show loading dialog for API recipes
+    if (recipe.runtimeType.toString().contains('Spoonacular')) {
+      if (!context.mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: Colors.orange),
+        ),
+      );
+    }
+
+    final provider = context.read<GroceryProvider>();
+    final detail = await provider.getRecipeDetail(recipe);
+
+    // Close loading dialog
+    if (recipe.runtimeType.toString().contains('Spoonacular') && context.mounted) {
+      Navigator.pop(context);
+    }
+
+    if (detail == null) {
+      // Show error message if detail fetch failed
+      if (context.mounted) {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              'Unable to load recipe details. The recipe might be unavailable.',
+              style: GoogleFonts.poppins(),
+            ),
+            backgroundColor: Colors.orange,
+            action: SnackBarAction(
+              label: 'Close',
+              textColor: Colors.white,
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
+    // Show detail bottom sheet
+    if (!context.mounted) return;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -460,150 +747,7 @@ class RecipeSuggestionScreen extends StatelessWidget {
                 child: ListView(
                   controller: scrollController,
                   padding: const EdgeInsets.all(24),
-                  children: [
-                    // Recipe name
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                recipe.name,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Text(
-                                recipe.nameThai,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  color: Colors.white.withValues(alpha: 0.6),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.restaurant,
-                            color: Colors.orange,
-                            size: 28,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Recipe info
-                    Row(
-                      children: [
-                        _buildInfoChip(
-                          Icons.access_time,
-                          '${recipe.cookingTime} min',
-                        ),
-                        const SizedBox(width: 12),
-                        _buildInfoChip(
-                          Icons.signal_cellular_alt,
-                          recipe.difficulty,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Ingredients section
-                    Text(
-                      'Ingredients',
-                      style: GoogleFonts.poppins(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Available ingredients
-                    if (availableIngredients.isNotEmpty) ...[
-                      _buildIngredientSection(
-                        'Available',
-                        recipe.ingredients
-                            .where((ing) => !missingIngredients.contains(ing))
-                            .toList(),
-                        availableIngredients,
-                        true,
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-
-                    // Missing ingredients
-                    if (missingIngredients.isNotEmpty) ...[
-                      _buildIngredientSection(
-                        'Missing',
-                        missingIngredients,
-                        availableIngredients,
-                        false,
-                        availableSubstitutes: availableSubstitutes,
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-
-                    // Instructions section
-                    Text(
-                      'Instructions',
-                      style: GoogleFonts.poppins(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.orange.withValues(alpha: 0.2),
-                        ),
-                      ),
-                      child: Text(
-                        recipe.instructions,
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.white,
-                          height: 1.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Thai instructions
-                    Text(
-                      'วิธีทำ',
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white.withValues(alpha: 0.8),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      recipe.instructionsThai,
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.6),
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                  ],
+                  children: _buildDetailContent(context, detail, availableIngredients, missingIngredients),
                 ),
               ),
             ],
@@ -613,14 +757,266 @@ class RecipeSuggestionScreen extends StatelessWidget {
     );
   }
 
+  /// Build detail content widgets list
+  List<Widget> _buildDetailContent(
+    BuildContext context,
+    Map<String, dynamic> detail,
+    List<String> availableIngredients,
+    List<String> missingIngredients,
+  ) {
+    // Extract used ingredients
+    final used = List<String>.from(detail['usedIngredients'] ?? detail['ingredients'] ?? []);
+    final imageUrl = detail['image'] ?? '';
+
+    return [
+      // Recipe image (if available)
+      if (imageUrl.isNotEmpty)
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Image.network(
+            imageUrl,
+            width: double.infinity,
+            height: 200,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: double.infinity,
+                height: 200,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.orange.withValues(alpha: 0.2),
+                      Colors.deepOrange.withValues(alpha: 0.1),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.restaurant_menu,
+                  size: 80,
+                  color: Colors.white24,
+                ),
+              );
+            },
+          ),
+        ),
+      if (imageUrl.isNotEmpty) const SizedBox(height: 20),
+
+      // Recipe name
+      Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  detail['title'] ?? 'Recipe',
+                  style: GoogleFonts.poppins(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                if (detail['titleThai'] != null)
+                  Text(
+                    detail['titleThai'],
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.white.withValues(alpha: 0.6),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.orange.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              detail['isFromAPI'] == true ? Icons.cloud : Icons.restaurant,
+              color: detail['isFromAPI'] == true ? Colors.purple : Colors.orange,
+              size: 28,
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 20),
+
+      // Recipe info
+      Row(
+        children: [
+          _buildInfoChip(
+            Icons.access_time,
+            '${detail['cookingTime'] ?? 30} min',
+          ),
+          const SizedBox(width: 12),
+          _buildInfoChip(
+            Icons.signal_cellular_alt,
+            detail['difficulty'] ?? 'Medium',
+          ),
+        ],
+      ),
+      const SizedBox(height: 20),
+
+      // Calories (if available)
+      if (detail['calories'] != null) ...[
+        Row(
+          children: [
+            CalorieDonutChart(
+              calorieBreakdown: detail['calorieBreakdown'] ?? {},
+              totalCalories: detail['calories'] ?? 0,
+              size: 80,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Total Calories / แคลอรี่รวม',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${detail['calories']} kcal',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (detail['calorieBreakdown'] != null)
+                    const SizedBox(height: 8),
+                  if (detail['calorieBreakdown'] != null)
+                    CalorieLegend(breakdown: detail['calorieBreakdown']),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+      ],
+
+      // Ingredients section
+      Text(
+        'Ingredients / วัตถุดิบ',
+        style: GoogleFonts.poppins(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+      const SizedBox(height: 12),
+
+      // Available ingredients
+      if (used.isNotEmpty) ...[
+        _buildIngredientSection(
+          context,
+          'Available / มีอยู่',
+          used,
+          true,
+        ),
+        const SizedBox(height: 16),
+      ],
+
+      // Missing ingredients
+      if (missingIngredients.isNotEmpty) ...[
+        _buildIngredientSection(
+          context,
+          'Missing / ขาด',
+          missingIngredients,
+          false,
+        ),
+        const SizedBox(height: 16),
+
+        // Add all missing ingredients button
+        ElevatedButton.icon(
+          onPressed: () => _addMissingIngredients(context, detail),
+          icon: const Icon(Icons.add_shopping_cart, size: 18),
+          label: Text(
+            'Add All Missing (${missingIngredients.length}) / เพิ่มทั้งหมดที่ขาด',
+            style: GoogleFonts.poppins(fontSize: 14),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.orange,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+      ],
+
+      // Instructions section
+      Text(
+        'Instructions / วิธีทำ',
+        style: GoogleFonts.poppins(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+      const SizedBox(height: 12),
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.orange.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.orange.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Text(
+          detail['instructions'] ?? 'No instructions available.',
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            color: Colors.white,
+            height: 1.5,
+          ),
+        ),
+      ),
+
+      // Thai instructions (if available)
+      if (detail['instructionsThai'] != null) ...[
+        const SizedBox(height: 24),
+        Text(
+          'วิธีทำ (Thai Instructions)',
+          style: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.white.withValues(alpha: 0.8),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          detail['instructionsThai'],
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: Colors.white.withValues(alpha: 0.6),
+            height: 1.5,
+          ),
+        ),
+      ],
+      const SizedBox(height: 32),
+    ];
+  }
+
   /// Build ingredient section
   Widget _buildIngredientSection(
+    BuildContext context,
     String title,
     List<String> items,
-    List<String> availableIngredients,
-    bool isAvailable, {
-    Map<String, List<String>>? availableSubstitutes,
-  }) {
+    bool isAvailable,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -682,62 +1078,6 @@ class RecipeSuggestionScreen extends StatelessWidget {
               ),
             );
           }),
-
-          // Show substitutes if available
-          if (!isAvailable && availableSubstitutes != null)
-            ...availableSubstitutes.entries.map((entry) {
-              final missingItem = entry.key;
-              final subs = entry.value;
-
-              if (items.any((item) => item.toLowerCase().contains(missingItem))) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.swap_horiz,
-                                color: Colors.green,
-                                size: 14,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Substitute with:',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.green.shade300,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            subs.join(', '),
-                            style: GoogleFonts.poppins(
-                              color: Colors.green.shade200,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
-              } else {
-                return const SizedBox();
-              }
-            }),
         ],
       ),
     );
@@ -770,5 +1110,78 @@ class RecipeSuggestionScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Add all missing ingredients to the grocery list
+  void _addMissingIngredients(BuildContext context, Map<String, dynamic> detail) {
+    final provider = context.read<GroceryProvider>();
+    final missingIngredients = List<String>.from(detail['missedIngredients'] ?? detail['ingredients'] ?? []);
+
+    if (missingIngredients.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'No missing ingredients to add / ไม่มีวัตถุดิบที่ขาด',
+            style: GoogleFonts.poppins(),
+          ),
+          backgroundColor: Colors.grey,
+        ),
+      );
+      return;
+    }
+
+    // Add each missing ingredient to the list
+    int addedCount = 0;
+    for (final ingredient in missingIngredients) {
+      // Create a new grocery item with default amount
+      final newItem = GroceryItem(
+        id: '${DateTime.now().millisecondsSinceEpoch}_$addedCount',
+        name: ingredient,
+        amount: 1,
+        unit: 'pcs',
+      );
+
+      // Check if it already exists
+      final existing = provider.items.any((item) =>
+        item.name.toLowerCase() == ingredient.toLowerCase() &&
+        !item.isPurchased
+      );
+
+      if (!existing) {
+        provider.addItemManually(newItem);
+        addedCount++;
+      }
+    }
+
+    // Show success message
+    if (addedCount > 0 && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Added $addedCount ingredient${addedCount > 1 ? 's' : ''} / เพิ่ม $addedCount รายการแล้ว',
+            style: GoogleFonts.poppins(),
+          ),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      // Close the bottom sheet after a short delay
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (context.mounted) {
+          Navigator.pop(context);
+        }
+      });
+    } else if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'All ingredients already in your list / มีวัตถุดิบอยู่แล้วทั้งหมด',
+            style: GoogleFonts.poppins(),
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
   }
 }
