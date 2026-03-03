@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:mobile_project/models/recipe.dart';
 import 'package:mobile_project/screens/grocery_page.dart';
 import 'package:mobile_project/screens/recipe_suggestion_screen.dart';
+import 'package:mobile_project/screens/ingredient_management_screen.dart';
+import 'package:mobile_project/services/spoonacular_service.dart';
 import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
 import 'providers/grocery_provider.dart';
@@ -24,8 +26,11 @@ class SmartKitchenApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => GroceryProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => GroceryProvider()),
+        ChangeNotifierProvider(create: (_) => SpoonacularService()),
+      ],
       child: MaterialApp(
         title: 'Smart Kitchen Assistant',
         debugShowCheckedModeBanner: false,
@@ -212,9 +217,10 @@ class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    HomeScreen(),
-    GroceryPage(),
-    RecipeNavWrapper(),
+    const HomeScreen(),
+    const GroceryPage(),
+    const RecipeNavWrapper(),
+    const IngredientManagementScreen(),
   ];
   
   @override
@@ -243,6 +249,11 @@ class _MainNavigationState extends State<MainNavigation> {
             icon: Icon(Icons.restaurant_menu_outlined),
             selectedIcon: Icon(Icons.restaurant_menu),
             label: 'Menu',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.scale_outlined),
+            selectedIcon: Icon(Icons.scale),
+            label: 'Ingredients',
           ),
         ],
       ),

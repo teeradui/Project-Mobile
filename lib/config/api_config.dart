@@ -4,11 +4,24 @@ class ApiConfig {
   /// Gemini API Key for grocery item extraction
   static const String geminiApiKey = 'AIzaSyDm82-gONGji37YPSafRDVDI2rwnAmxWlE';
 
+  /// Spoonacular API Key for ingredient parsing and nutrition
+  static const String spoonacularApiKey = '6640bb7876804f569a369e48949e0fc1';
+
   /// API Configuration
   static const String geminiModel = 'gemini-pro';
   static const double temperature = 0.3;
   static const int maxOutputTokens = 1024;
 
-  /// Check if API is configured
-  static bool get isConfigured => geminiApiKey.isNotEmpty && geminiApiKey != 'YOUR_API_KEY_HERE';
+  /// Check if Gemini API is configured
+  static bool get isGeminiConfigured =>
+      geminiApiKey.isNotEmpty &&
+      geminiApiKey != 'AIzaSyDm82-gONGji37YPSafRDVDI2rwnAmxWlE';
+
+  /// Check if Spoonacular API is configured
+  static bool get isSpoonacularConfigured =>
+      spoonacularApiKey.isNotEmpty &&
+      spoonacularApiKey != '6640bb7876804f569a369e48949e0fc1';
+
+  /// Check if any API is configured
+  static bool get isConfigured => isGeminiConfigured || isSpoonacularConfigured;
 }
