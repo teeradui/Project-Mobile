@@ -29,6 +29,7 @@ dependencies:
   # Utilities
   intl: ^0.19.0
   shared_preferences: ^2.3.3
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -37,3 +38,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo/1.png"
+  adaptive_icon_foreground: "assets/logo/1.png"
+  adaptive_icon_background: "#f5efdf"
