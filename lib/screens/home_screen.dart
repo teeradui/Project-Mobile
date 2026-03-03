@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../models/grocery_item.dart';
 import '../providers/grocery_provider.dart';
+import '../services/voice_service.dart';
 import 'recipe_suggestion_screen.dart';
 
 /// Home Screen - Voice Input Only
@@ -380,8 +381,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   /// Build input section
   Widget _buildInputSection(BuildContext context) {
-    final provider = context.watch<GroceryProvider>();
-
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -403,37 +402,43 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Error message display
-            if (provider.errorMessage.isNotEmpty)
-              Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.red.withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        provider.errorMessage,
-                        style: GoogleFonts.poppins(
-                          color: Colors.red.shade200,
-                          fontSize: 12,
-                        ),
+            Consumer<GroceryProvider>(
+              builder: (context, provider, child) {
+                if (provider.errorMessage.isNotEmpty) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.red.withValues(alpha: 0.4),
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () => provider.clearError(),
-                      child: const Icon(Icons.close, color: Colors.red, size: 16),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            provider.errorMessage,
+                            style: GoogleFonts.poppins(
+                              color: Colors.red.shade200,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => provider.clearError(),
+                          child: const Icon(Icons.close, color: Colors.red, size: 16),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  );
+                }
+                return const SizedBox();
+              },
+            ),
 
             // Text input field
             Container(
@@ -473,8 +478,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
             const SizedBox(height: 12),
 
-            // Voice recording button
-            _buildRecordButton(context, provider),
+            // Voice recording button and calculate button
+            Consumer<GroceryProvider>(
+              builder: (context, provider, child) {
+                return Column(
+                  children: [
+                    _buildRecordButton(context, provider),
+                    const SizedBox(height: 12),
+                    _buildCalculateButton(context),
+                  ],
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -637,6 +652,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     await voiceService.startListening(
       onResult: (text) {
         provider.processInput(text, isVoice: true);
+      },
+      onIntent: (intent) {
+        // Handle voice intent - if keywords detected, navigate to recipes
+        if (intent == VoiceIntent.showRecipes && provider.totalItems > 0) {
+          _stopListening(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RecipeSuggestionScreen(
+                ingredients: provider.unpurchasedItems.map((e) => e.name).toList(),
+              ),
+            ),
+          );
+        }
       },
     );
 

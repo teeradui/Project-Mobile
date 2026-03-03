@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze)",
+      "Bash(flutter analyze --no-fatal-infos)",
+      "Bash(flutter run --release)"
+    ]
+  }
+}

@@ -4,8 +4,14 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt show SpeechListenOptions, ListenMode;
 
-/// Voice Service
-/// A reusable class to handle microphone permissions and Speech-to-Text logic
+/// Voice Intent Type
+enum VoiceIntent {
+  addIngredients,
+  showRecipes,
+  unknown,
+}
+
+/// Voice Service with Keyword Detection
 class VoiceService extends ChangeNotifier {
   final SpeechToText _speech = SpeechToText();
 
@@ -15,10 +21,12 @@ class VoiceService extends ChangeNotifier {
   String _errorMessage = '';
   double _confidence = 0.0;
   bool _hasPermission = false;
+  VoiceIntent _detectedIntent = VoiceIntent.unknown;
 
-  // Stream controllers for real-time updates
+  // Stream controllers
   final StreamController<String> _onResultController = StreamController<String>.broadcast();
   final StreamController<String> _onErrorController = StreamController<String>.broadcast();
+  final StreamController<VoiceIntent> _onIntentController = StreamController<VoiceIntent>.broadcast();
 
   // Getters
   bool get isInitialized => _isInitialized;
@@ -27,15 +35,25 @@ class VoiceService extends ChangeNotifier {
   String get errorMessage => _errorMessage;
   double get confidence => _confidence;
   bool get hasPermission => _hasPermission;
+  VoiceIntent get detectedIntent => _detectedIntent;
 
   // Streams
   Stream<String> get onResult => _onResultController.stream;
   Stream<String> get onError => _onErrorController.stream;
+  Stream<VoiceIntent> get onIntent => _onIntentController.stream;
+
+  // Keywords for intent detection (English only)
+  static const Set<String> _recipeKeywords = {
+    // English keywords
+    'what should i eat', 'what to eat', 'recommend menu', 'menu', 'recipe',
+    'show recipes', 'calculate recipes', 'suggest recipe', 'food suggestion',
+    'what can i cook', 'what to cook', 'meal plan', 'meal ideas',
+    'find recipes', 'search recipes', 'recipe ideas', 'cook with',
+  };
 
   /// Initialize speech recognition
   Future<bool> initialize() async {
     try {
-      // Check if speech recognition is available
       bool available = await _speech.initialize(
         onError: (error) {
           _errorMessage = error.errorMsg;
@@ -111,9 +129,17 @@ class VoiceService extends ChangeNotifier {
     }
   }
 
-  /// Open app settings for permission
-  Future<void> openAppSettings() async {
-    await openAppSettings();
+  /// Detect intent from recognized text
+  VoiceIntent _detectIntent(String text) {
+    final lowerText = text.toLowerCase();
+
+    for (String keyword in _recipeKeywords) {
+      if (lowerText.contains(keyword)) {
+        return VoiceIntent.showRecipes;
+      }
+    }
+
+    return VoiceIntent.addIngredients;
   }
 
   /// Start listening to speech
@@ -122,6 +148,7 @@ class VoiceService extends ChangeNotifier {
     Duration? listenFor,
     Duration? pauseFor,
     Function(String)? onResult,
+    Function(VoiceIntent)? onIntent,
   }) async {
     if (!_isInitialized) {
       bool initialized = await initialize();
@@ -147,6 +174,7 @@ class VoiceService extends ChangeNotifier {
       _isListening = true;
       _recognizedWords = '';
       _errorMessage = '';
+      _detectedIntent = VoiceIntent.unknown;
       notifyListeners();
 
       await _speech.listen(
@@ -154,17 +182,25 @@ class VoiceService extends ChangeNotifier {
           _recognizedWords = result.recognizedWords;
           _confidence = result.confidence;
 
-          // Emit to stream
+          // Detect intent when we have results
+          final intent = _detectIntent(result.recognizedWords);
+          if (_detectedIntent != intent) {
+            _detectedIntent = intent;
+            _onIntentController.add(intent);
+          }
+
           _onResultController.add(result.recognizedWords);
 
-          // Callback if provided
           if (onResult != null && result.finalResult) {
             onResult(result.recognizedWords);
           }
 
+          if (onIntent != null && result.finalResult) {
+            onIntent(_detectedIntent);
+          }
+
           notifyListeners();
 
-          // Auto-stop on final result
           if (result.finalResult) {
             _isListening = false;
             notifyListeners();
@@ -205,6 +241,7 @@ class VoiceService extends ChangeNotifier {
     await _speech.cancel();
     _isListening = false;
     _recognizedWords = '';
+    _detectedIntent = VoiceIntent.unknown;
     notifyListeners();
   }
 
@@ -220,6 +257,11 @@ class VoiceService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Reset intent
+  void clearIntent() {
+    _detectedIntent = VoiceIntent.unknown;
+  }
+
   /// Get available locales
   Future<List<LocaleName>> getAvailableLocales() async {
     return await _speech.locales();
@@ -230,6 +272,7 @@ class VoiceService extends ChangeNotifier {
   void dispose() {
     _onResultController.close();
     _onErrorController.close();
+    _onIntentController.close();
     super.dispose();
   }
 }

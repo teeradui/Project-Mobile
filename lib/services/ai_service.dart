@@ -21,46 +21,63 @@ class AIService extends ChangeNotifier {
   String get errorMessage => _errorMessage;
   bool get isConfigured => _apiKey.isNotEmpty;
 
-  // Valid food ingredients database for filtering
+  // Valid food ingredients database for filtering (English only)
   static const Set<String> _validIngredients = {
-    // Vegetables (ผัก)
+    // Vegetables
     'tomato', 'tomatoes', 'onion', 'onions', 'garlic', 'ginger', 'carrot', 'carrots',
     'potato', 'potatoes', 'broccoli', 'cabbage', 'lettuce', 'spinach', 'mushroom',
-    'mushrooms', 'bell pepper', 'peppers', 'cucumber', 'celery', 'corn', 'beans',
-    'ถั่ว', 'ผัก', 'มะเขือ', 'พริก', 'กระเทียม', 'หอม', 'แครอท', 'มัน', 'ผักกาด',
+    'mushrooms', 'bell pepper', 'peppers', 'cucumber', 'celery', 'corn',
+    'green beans', 'asparagus', 'zucchini', 'eggplant', 'cauliflower',
+    'kale', 'peas', 'artichoke', 'brussels sprouts',
 
-    // Meat (เนื้อ)
+    // Meat
     'chicken', 'beef', 'pork', 'fish', 'shrimp', 'crab', 'bacon', 'ham', 'sausage',
-    'meatball', 'meatballs', 'lamb', 'duck', 'ไก่', 'หมู', 'เนื้อ', 'ปลา', 'กุ้ง', 'หมึก',
+    'meatball', 'meatballs', 'lamb', 'duck', 'turkey', 'veal', 'steak', 'salmon',
+    'tuna', 'cod', 'tilapia', 'scallops', 'lobster',
 
-    // Dairy (นม)
-    'milk', 'cheese', 'butter', 'cream', 'yogurt', 'egg', 'eggs',
-    'นม', 'เนย', 'ไข่', 'ชีส', 'โยเกิร์ต',
+    // Dairy
+    'milk', 'cheese', 'butter', 'cream', 'yogurt', 'egg', 'eggs', 'sour cream',
+    'whipped cream', 'heavy cream', 'buttermilk', 'condensed milk', 'parmesan',
+    'mozzarella', 'cheddar', 'swiss', 'gouda', 'ricotta', 'feta', 'goat cheese',
 
-    // Fruits (ผลไม้)
+    // Fruits
     'apple', 'apples', 'banana', 'bananas', 'orange', 'oranges', 'lemon', 'lime',
-    'strawberry', 'watermelon', 'mango', 'pineapple', 'grape', 'grapes',
-    'ส้ม', 'กล้วย', 'แอปเปิ้ล', 'มะนาว', 'สับปะรด', 'มะม่วง',
+    'strawberry', 'strawberries', 'watermelon', 'mango', 'pineapple', 'grape', 'grapes',
+    'blueberry', 'raspberry', 'blackberry', 'peach', 'pear', 'plum', 'cherry', 'kiwi',
+    'avocado', 'coconut', 'pomegranate', 'fig', 'date',
 
-    // Grains & Starch (ธัญพืช)
+    // Grains & Starch
     'rice', 'pasta', 'noodle', 'noodles', 'bread', 'flour', 'oats', 'cereal',
-    'ข้าว', 'บะหมี่', 'เส้น', 'ขนมปัง', 'แป้ง',
+    'quinoa', 'barley', 'couscous', 'lentils', 'chickpeas', 'tortilla',
+    'cracker', 'crackers', 'bagel', 'muffin', 'pancake', 'waffle', 'croissant',
 
-    // Condiments & Sauces (เครื่องปรุง)
-    'salt', 'pepper', 'sugar', 'oil', 'soy sauce', 'fish sauce', 'oyster sauce',
-    'vinegar', 'ketchup', 'mayonnaise', 'mustard', 'herbs', 'spices',
-    'น้ำปลา', 'ซอส', 'น้ำมัน', 'เกลือ', 'พริกไทย', 'น้ำตาล', 'น้ำส้ม',
+    // Condiments & Sauces
+    'salt', 'pepper', 'sugar', 'oil', 'olive oil', 'vegetable oil', 'soy sauce',
+    'fish sauce', 'oyster sauce', 'vinegar', 'ketchup', 'mayonnaise', 'mustard',
+    'relish', 'hot sauce', 'salsa', 'pesto', 'barbecue sauce', 'teriyaki sauce',
+    'worcestershire sauce', 'tahini', 'hummus', 'guacamole',
 
-    // Others (อื่นๆ)
-    'water', 'juice', 'coffee', 'tea', 'chocolate', 'honey', 'peanut', 'peanuts',
-    'almond', 'almonds', 'walnut', 'cashew', 'coconut', 'น้ำ', 'กาแฟ', 'ชา', 'มะพร้าว',
+    // Herbs & Spices
+    'basil', 'oregano', 'thyme', 'rosemary', 'parsley', 'cilantro', 'dill', 'mint',
+    'sage', 'cumin', 'paprika', 'cinnamon', 'nutmeg', 'cayenne', 'chili powder',
+    'garlic powder', 'onion powder', 'turmeric', 'curry powder',
+
+    // Nuts & Seeds
+    'peanut', 'peanuts', 'almond', 'almonds', 'walnut', 'cashew', 'pecan',
+    'pistachio', 'hazelnut', 'macadamia', 'sesame seeds', 'sunflower seeds',
+    'pumpkin seeds', 'chia seeds', 'flax seeds',
+
+    // Others
+    'water', 'juice', 'coffee', 'tea', 'chocolate', 'honey', 'maple syrup',
+    'vanilla extract', 'baking powder', 'baking soda', 'yeast', 'gelatin',
+    'broth', 'stock', 'tomato sauce', 'pasta sauce', 'coconut milk',
   };
 
   // Invalid words to filter out (common speech recognition errors)
   static const Set<String> _invalidWords = {
-    'um', 'uh', 'ah', 'like', 'just', 'actually', 'basically',
+    'um', 'uh', 'ah', 'like', 'just', 'basically',
     'kind of', 'sort of', 'you know', 'I mean', 'okay', 'alright',
-    'เออ', 'อือ', 'อะ', 'ง่า', 'ซึ้ง', 'นะ', 'อ่ะ', 'อ่อ',
+    'maybe', 'probably', 'literally', 'seriously',
   };
 
   // Set your Gemini API Key here or use setApiKey()
@@ -69,32 +86,32 @@ class AIService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Enhanced prompt for ingredient extraction
+  /// Enhanced prompt for ingredient extraction (English only)
   static const String _systemPrompt = '''
-You are a food ingredient extraction assistant specialized in Thai and English cuisine.
+You are a food ingredient extraction assistant specialized in English cuisine.
 
 STRICT RULES:
 1. Return ONLY a valid JSON array
 2. Each item must have: "item" (name), "qty" (number), "unit" (pcs, kg, g, cup, liter, etc)
 3. Extract ONLY food/ingredients - ignore non-food items
 4. Remove speech filler words (um, uh, like, etc)
-5. Support both Thai and English ingredient names
+5. Use English ingredient names only
 6. Default quantity is 1 if not specified
 7. Default unit is "pcs" if not specified
 
 VALID FOOD CATEGORIES:
-- Vegetables: tomato, onion, garlic, carrot, broccoli, ถั่ว, ผัก, มะเขือ, พริก
-- Meat: chicken, pork, beef, fish, shrimp, ไก่, หมู, เนื้อ, ปลา, กุ้ง
-- Dairy: milk, cheese, butter, eggs, นม, ไข่
-- Fruits: apple, banana, orange, ส้ม, กล้วย, มะม่วง
-- Grains: rice, pasta, bread, ข้าว, บะหมี่, ขนมปัง
-- Condiments: salt, sugar, oil, sauce, เกลือ, น้ำปลา, ซอส
+- Vegetables: tomato, onion, garlic, carrot, broccoli, cabbage, lettuce, spinach, mushrooms
+- Meat: chicken, pork, beef, fish, shrimp, crab, bacon, ham, sausage
+- Dairy: milk, cheese, butter, eggs, yogurt, cream
+- Fruits: apple, banana, orange, lemon, strawberry, mango
+- Grains: rice, pasta, bread, flour, oats, cereal
+- Condiments: salt, sugar, oil, soy sauce, vinegar, ketchup
 
 INPUT EXAMPLES:
 - "2 kg chicken" -> [{"item":"chicken","qty":2,"unit":"kg"}]
-- "ไก่ 2 ตัว พริก 5 เม็ด" -> [{"item":"ไก่","qty":2,"unit":"ตัว"},{"item":"พริก","qty":5,"unit":"เม็ด"}]
+- "500g beef and 3 onions" -> [{"item":"beef","qty":500,"unit":"g"},{"item":"onions","qty":3,"unit":"pcs"}]
 - "Need eggs and milk" -> [{"item":"eggs","qty":1,"unit":"pcs"},{"item":"milk","qty":1,"unit":"liter"}]
-- "ขอไก่กับพริกหน่อย" -> [{"item":"ไก่","qty":1,"unit":"ตัว"},{"item":"พริก","qty":1,"unit":"ถุง"}]
+- "5 apples" -> [{"item":"apples","qty":5,"unit":"pcs"}]
 
 Return ONLY the JSON array, no explanation.
 ''';
@@ -115,6 +132,7 @@ Return ONLY the JSON array, no explanation.
     try {
       // Pre-process input: remove invalid words
       final cleanedInput = _cleanInput(userInput);
+      debugPrint('Processing input: "$cleanedInput"');
 
       // Try AI API first (if configured)
       if (isConfigured) {
@@ -125,6 +143,7 @@ Return ONLY the JSON array, no explanation.
           if (validItems.isNotEmpty) {
             _isLoading = false;
             notifyListeners();
+            debugPrint('API returned ${validItems.length} items');
             return validItems;
           }
         } catch (e) {
@@ -135,6 +154,17 @@ Return ONLY the JSON array, no explanation.
       // Fallback to enhanced local parsing
       final items = _tryLocalParsing(cleanedInput);
       final validItems = _filterValidIngredients(items);
+
+      // ULTIMATE FALLBACK: If still empty, try to extract ANY word as ingredient
+      if (validItems.isEmpty) {
+        debugPrint('Local parsing failed, trying ultimate fallback');
+        final fallbackItems = _ultimateFallback(cleanedInput);
+        if (fallbackItems.isNotEmpty) {
+          _isLoading = false;
+          notifyListeners();
+          return fallbackItems;
+        }
+      }
 
       _isLoading = false;
       notifyListeners();
@@ -149,6 +179,33 @@ Return ONLY the JSON array, no explanation.
       // Return empty list on error
       return [];
     }
+  }
+
+  /// Ultimate fallback - extract ANY word as ingredient with default values
+  List<GroceryItem> _ultimateFallback(String input) {
+    debugPrint('Ultimate fallback for: "$input"');
+    final List<GroceryItem> items = [];
+
+    // Extract all words (2-20 characters, letters only)
+    final words = RegExp(r'\b[a-zA-Z]{2,20}\b').allMatches(input).map((m) => m.group(0)!).toList();
+
+    for (final word in words) {
+      final lower = word.toLowerCase();
+      // Skip obvious non-words
+      if (['the', 'and', 'for', 'with', 'have', 'want', 'need', 'get', 'make', 'cook'].contains(lower)) {
+        continue;
+      }
+
+      items.add(GroceryItem(
+        id: DateTime.now().millisecondsSinceEpoch.toString() + '_${items.length}',
+        name: lower,
+        amount: 1,
+        unit: 'pcs',
+      ));
+      debugPrint('  -> Fallback added: $lower');
+    }
+
+    return items;
   }
 
   /// Clean input by removing invalid filler words
@@ -174,7 +231,7 @@ Return ONLY the JSON array, no explanation.
     }).toList();
   }
 
-  /// Check if an ingredient is valid food item
+  /// Check if an ingredient is valid food item (English only)
   bool _isValidIngredient(String itemName) {
     // Check against valid ingredients list (partial match allowed)
     for (final valid in _validIngredients) {
@@ -189,11 +246,10 @@ Return ONLY the JSON array, no explanation.
       return _validIngredients.contains(singular);
     }
 
-    // If not found in list, use basic food keyword check
+    // If not found in list, use basic food keyword check (English only)
     final foodKeywords = [
       'meat', 'fish', 'chicken', 'pork', 'beef', 'shrimp', 'crab',
       'vegetable', 'fruit', 'dairy', 'grain', 'herb', 'spice',
-      'เนื้อ', 'ปลา', 'ไก่', 'หมู', 'กุ้ง', 'ผัก', 'ผลไม้', 'เครื่องเทศ',
     ];
 
     for (final keyword in foodKeywords) {
@@ -204,8 +260,8 @@ Return ONLY the JSON array, no explanation.
 
     // Accept short words (likely valid ingredients)
     if (itemName.length <= 15 && itemName.length >= 2) {
-      // Reject obviously invalid patterns
-      if (!RegExp(r'^[a-zA-Zก-๙ะ-์\s]+$').hasMatch(itemName)) {
+      // Only accept English letters and spaces
+      if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(itemName)) {
         return false;
       }
       return true;
@@ -296,89 +352,150 @@ Return ONLY the JSON array, no explanation.
     }
   }
 
-  /// Enhanced local parsing for Thai and English ingredients
+  /// Enhanced local parsing for English ingredients
   List<GroceryItem> _tryLocalParsing(String input) {
     final List<GroceryItem> items = [];
 
-    // Thai pattern: "ไก่ 2 ตัว", "พริก 5 เม็ด"
-    final thaiPattern = RegExp(
-      r'([ก-๙\s]+)\s*(\d+(?:\.\d+)?)\s*(ตัว|เม็ด|กรัม|กิโล|ถ้วย|หัว|ลูก|ซอง|แพ็ค|ลิตร)?',
-      caseSensitive: false,
-    );
+    debugPrint('Local parsing input: "$input"');
 
-    // English pattern: "2 kg chicken", "5 apples"
-    final englishPattern = RegExp(
-      r'(\d+(?:\.\d+)?)\s*(kg|g|lb|oz|liter|ml|cup|pcs|pieces|dozen|pack|bag|bottle|cans?)?\s*(?:of\s+)?([a-zA-Z]+)',
-      caseSensitive: false,
-    );
+    // Simple patterns to try in order
+    final patterns = [
+      // Pattern 1: "2 kg chicken" or "500g beef"
+      RegExp(r'(\d+(?:\.\d+)?)\s*(kg|g|gram|grams|lb|oz|liter|ml|cup|pcs|pieces)?\s*([a-z]+)', caseSensitive: false),
+      // Pattern 2: "chicken 2kg" or "beef 500g"
+      RegExp(r'([a-z]+)\s+(\d+(?:\.\d+)?)\s*(kg|g|gram|grams|lbs?|oz|ml|liter|cup|pcs)?', caseSensitive: false),
+      // Pattern 3: "5 apples" or "10 eggs"
+      RegExp(r'(\d+(?:\.\d+)?)\s+([a-z]+)', caseSensitive: false),
+    ];
 
-    // Simple pattern: "chicken", "ไก่"
-    final simplePattern = RegExp(r'([a-zA-Zก-๙]+)', caseSensitive: false);
+    for (final pattern in patterns) {
+      final matches = pattern.allMatches(input);
+      debugPrint('Pattern ${pattern.pattern} found ${matches.length} matches');
 
-    // Try Thai pattern first
-    final thaiMatches = thaiPattern.allMatches(input);
-    for (final match in thaiMatches) {
-      try {
-        final name = _cleanItemName(match.group(1) ?? '');
-        final amount = double.tryParse(match.group(2) ?? '1') ?? 1;
-        final unit = match.group(3) ?? 'ตัว';
+      for (final match in matches) {
+        try {
+          late final String name;
+          late final double amount;
+          late final String unit;
 
-        if (name.isNotEmpty && _isValidIngredient(name)) {
-          items.add(GroceryItem(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            name: name,
-            amount: amount,
-            unit: unit,
-          ));
+          // Determine which pattern matched and extract accordingly
+          if (match.groupCount >= 3 && match.group(3) != null && RegExp(r'[a-z]', caseSensitive: false).hasMatch(match.group(3) ?? '')) {
+            // Pattern 1: amount unit name
+            amount = double.tryParse(match.group(1) ?? '1') ?? 1;
+            unit = _normalizeUnit(match.group(2) ?? '');
+            name = _cleanItemName(match.group(3) ?? '');
+          } else if (match.group(1) != null && RegExp(r'[a-z]', caseSensitive: false).hasMatch(match.group(1) ?? '')) {
+            // Pattern 2: name amount unit
+            name = _cleanItemName(match.group(1) ?? '');
+            amount = double.tryParse(match.group(2) ?? '1') ?? 1;
+            unit = _normalizeUnit(match.group(3) ?? '');
+          } else {
+            // Pattern 3: amount name
+            amount = double.tryParse(match.group(1) ?? '1') ?? 1;
+            name = _cleanItemName(match.group(2) ?? '');
+            unit = 'pcs';
+          }
+
+          if (name.isNotEmpty && _isLikelyIngredient(name)) {
+            final item = GroceryItem(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              name: name,
+              amount: amount,
+              unit: unit.isNotEmpty ? unit : 'pcs',
+            );
+            items.add(item);
+            debugPrint('  -> Parsed: ${item.name} (${item.amount} ${item.unit})');
+          }
+        } catch (e) {
+          debugPrint('Parse error: $e');
         }
-      } catch (e) {
-        debugPrint('Thai parse error: $e');
+      }
+
+      if (items.isNotEmpty) break; // Stop if we found something
+    }
+
+    // Remove duplicates based on name
+    final uniqueItems = <String, GroceryItem>{};
+    for (final item in items) {
+      final key = item.name.toLowerCase();
+      if (!uniqueItems.containsKey(key)) {
+        uniqueItems[key] = item;
       }
     }
 
-    // Try English pattern
-    final englishMatches = englishPattern.allMatches(input);
-    for (final match in englishMatches) {
-      try {
-        final amount = double.tryParse(match.group(1) ?? '1') ?? 1;
-        final unit = _normalizeUnit(match.group(2) ?? 'pcs');
-        final name = _cleanItemName(match.group(3) ?? '');
-
-        if (name.isNotEmpty && _isValidIngredient(name)) {
-          items.add(GroceryItem(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            name: name,
-            amount: amount,
-            unit: unit,
-          ));
-        }
-      } catch (e) {
-        debugPrint('English parse error: $e');
-      }
-    }
-
-    // If no patterns matched, try simple word extraction
-    if (items.isEmpty) {
-      final simpleMatches = simplePattern.allMatches(input);
-      final words = simpleMatches.map((m) => m.group(1)!).toSet();
-
-      for (final word in words) {
-        final cleaned = _cleanItemName(word);
-        if (cleaned.length >= 2 && _isValidIngredient(cleaned)) {
-          items.add(GroceryItem(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            name: cleaned,
-            amount: 1,
-            unit: 'pcs',
-          ));
-        }
-      }
-    }
-
-    return items;
+    debugPrint('Final parsed items: ${uniqueItems.values.length}');
+    return uniqueItems.values.toList();
   }
 
-  /// Normalize unit names
+  /// Check if a word is likely a food ingredient (English only)
+  bool _isLikelyIngredient(String name) {
+    if (name.isEmpty) return false;
+
+    final lower = name.toLowerCase().trim();
+
+    debugPrint('Checking if "$name" is likely ingredient');
+
+    // Reject obvious non-food words
+    final nonFood = [
+      'the', 'a', 'an', 'and', 'or', 'but', 'for', 'with', 'without',
+      'want', 'need', 'have', 'get', 'add', 'put', 'make', 'cook',
+      'some', 'more', 'much', 'many', 'lot', 'little', 'bit',
+      'recipe', 'dish', 'meal', 'food', 'cooking',
+      'please', 'thanks', 'thank', 'hello', 'hi',
+    ];
+
+    if (nonFood.contains(lower)) {
+      debugPrint('  -> Rejected (non-food word)');
+      return false;
+    }
+
+    // Accept known ingredients
+    if (_isValidIngredient(lower)) {
+      debugPrint('  -> Accepted (valid ingredient)');
+      return true;
+    }
+
+    // Accept if it's a food-related word (2-25 characters)
+    if (lower.length >= 2 && lower.length <= 25) {
+      // Common food categories
+      final foodCategories = [
+        'meat', 'fish', 'chicken', 'pork', 'beef', 'shrimp', 'crab',
+        'fruit', 'vegetable', 'dairy', 'cheese', 'milk', 'egg', 'eggs',
+        'rice', 'bread', 'pasta', 'noodle', 'sauce', 'oil', 'spice',
+        'salt', 'sugar', 'pepper', 'onion', 'garlic', 'tomato', 'tomatoes',
+        'potato', 'carrot', 'beans', 'leaf', 'green', 'apple', 'banana',
+      ];
+
+      for (final category in foodCategories) {
+        if (lower.contains(category)) {
+          debugPrint('  -> Accepted (contains food category: $category)');
+          return true;
+        }
+      }
+
+      // More permissive: Accept reasonable length words that aren't obvious junk
+      if (RegExp(r'^[a-z\s]+$').hasMatch(lower)) {
+        debugPrint('  -> Accepted (valid word format)');
+        return true;
+      }
+    }
+
+    debugPrint('  -> Rejected (failed all checks)');
+    return false;
+  }
+
+  /// Clean item name from extra words and symbols (English only)
+  String _cleanItemName(String name) {
+    return name
+        .replaceAll(RegExp(r'[0-9]'), '')
+        .replaceAll(RegExp(r'[^\w\s]'), '')  // Only alphanumeric and spaces
+        .trim()
+        .split(' ')
+        .where((word) => word.isNotEmpty)
+        .join(' ');
+  }
+
+  /// Normalize unit names (English only)
   String _normalizeUnit(String unit) {
     final normalized = unit.toLowerCase().trim();
 
@@ -395,30 +512,12 @@ Return ONLY the JSON array, no explanation.
       'bag': 'bag',
       'bottle': 'bottle',
       'can': 'can', 'cans': 'can',
-      'ตัว': 'ตัว',
-      'เม็ด': 'เม็ด',
-      'กรัม': 'g',
-      'กิโล': 'kg',
-      'ลิตร': 'liter',
-      'ถ้วย': 'cup',
-      'หัว': 'head',
-      'ลูก': 'pcs',
-      'ซอง': 'can',
-      'แพ็ค': 'pack',
+      'head': 'head',
+      'clove': 'cloves', 'cloves': 'cloves',
+      'cup': 'cup', 'cups': 'cup',
     };
 
     return unitMap[normalized] ?? normalized;
-  }
-
-  /// Clean item name from extra words and symbols
-  String _cleanItemName(String name) {
-    return name
-        .replaceAll(RegExp(r'[0-9]'), '')
-        .replaceAll(RegExp(r'[^\w\sก-๙ะ-์]'), '')
-        .trim()
-        .split(' ')
-        .where((word) => word.isNotEmpty)
-        .join(' ');
   }
 
   /// Clear error message
