@@ -4,10 +4,14 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../models/grocery_item.dart';
 import '../providers/grocery_provider.dart';
+import '../services/spoonacular_service.dart';
 import 'recipe_suggestion_screen.dart';
 
-/// Home Screen - Voice Input Only
-/// Main screen for adding ingredients via voice input
+// Export the IngredientSearchResult for use in this file
+export '../services/spoonacular_service.dart' show IngredientSearchResult;
+
+/// Home Screen - Voice Input with Validation
+/// Main screen for adding ingredients via voice/text with validation layer
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -19,6 +23,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final TextEditingController _textController = TextEditingController();
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+
+  // Validation state
+  bool _validateBeforeAdd = false;
+  bool _isValidating = false;
 
   @override
   void initState() {
@@ -447,12 +455,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
               child: TextField(
                 controller: _textController,
+                enabled: !_isValidating,
                 style: GoogleFonts.poppins(
                   color: Colors.white,
                   fontSize: 15,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Type or speak to add ingredients...',
+                  hintText: _isValidating
+                      ? 'Validating ingredient...'
+                      : (_validateBeforeAdd
+                          ? 'Type ingredient to validate & add...'
+                          : 'Type or speak to add ingredients...'),
                   hintStyle: GoogleFonts.poppins(
                     color: Colors.white.withValues(alpha: 0.4),
                     fontSize: 14,
@@ -462,12 +475,110 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     horizontal: 20,
                     vertical: 16,
                   ),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.send, color: Colors.orange),
-                    onPressed: () => _submitText(context),
-                  ),
+                  suffixIcon: _isValidating
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.orange,
+                          ),
+                        )
+                      : IconButton(
+                          icon: const Icon(Icons.send, color: Colors.orange),
+                          onPressed: () => _submitText(context),
+                        ),
                 ),
                 onSubmitted: (_) => _submitText(context),
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // API Quota Indicator (when validation is enabled)
+            if (_validateBeforeAdd)
+              Consumer<SpoonacularService>(
+                builder: (context, service, _) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: service.hasQuotaAvailable
+                          ? Colors.green.withValues(alpha: 0.1)
+                          : Colors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: service.hasQuotaAvailable
+                            ? Colors.green.withValues(alpha: 0.3)
+                            : Colors.red.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.api,
+                          size: 14,
+                          color: service.hasQuotaAvailable
+                              ? Colors.green.shade400
+                              : Colors.red.shade400,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'API Quota: ${service.remainingQuota}/150',
+                          style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            color: Colors.white.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+
+            if (_validateBeforeAdd) const SizedBox(height: 8),
+
+            // Validation Toggle
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _validateBeforeAdd ? Icons.verified : Icons.offline_bolt,
+                    size: 18,
+                    color: _validateBeforeAdd ? Colors.green.shade400 : Colors.orange.shade400,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      _validateBeforeAdd
+                          ? 'Validate ingredients before adding'
+                          : 'Quick add (skip validation)',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ),
+                  Switch(
+                    value: _validateBeforeAdd,
+                    onChanged: !_isValidating
+                        ? (value) {
+                            setState(() {
+                              _validateBeforeAdd = value;
+                            });
+                          }
+                        : null,
+                  ),
+                ],
               ),
             ),
 
@@ -635,8 +746,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
 
     await voiceService.startListening(
-      onResult: (text) {
-        provider.processInput(text, isVoice: true);
+      onResult: (text) async {
+        if (_validateBeforeAdd) {
+          // Validate the voice input
+          _textController.text = text;
+          await _validateAndAddIngredient(context);
+        } else {
+          provider.processInput(text, isVoice: true);
+        }
       },
     );
 
@@ -652,12 +769,134 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   /// Submit text input
-  void _submitText(BuildContext context) {
+  Future<void> _submitText(BuildContext context) async {
     if (_textController.text.trim().isEmpty) return;
 
-    final provider = context.read<GroceryProvider>();
-    provider.processInput(_textController.text, isVoice: false);
-    _textController.clear();
+    if (_validateBeforeAdd) {
+      await _validateAndAddIngredient(context);
+    } else {
+      final provider = context.read<GroceryProvider>();
+      provider.processInput(_textController.text, isVoice: false);
+      _textController.clear();
+    }
+  }
+
+  /// Validate ingredient before adding
+  Future<void> _validateAndAddIngredient(BuildContext context) async {
+    final ingredientName = _textController.text.trim();
+    final service = context.read<SpoonacularService>();
+
+    setState(() => _isValidating = true);
+
+    try {
+      // Validate against Spoonacular database
+      final validationResult = await service.validateIngredient(ingredientName);
+
+      if (validationResult == null) {
+        // Ingredient not found
+        if (mounted) {
+          _showIngredientNotFoundDialog(ingredientName);
+        }
+      } else {
+        // Show confirmation dialog
+        if (mounted) {
+          final shouldAdd = await _showIngredientConfirmationDialog(
+            ingredientName,
+            validationResult,
+          );
+
+          if (shouldAdd == true) {
+            // Add the validated ingredient
+            final provider = context.read<GroceryProvider>();
+            provider.processInput(validationResult.name, isVoice: false);
+            _textController.clear();
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Validation error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isValidating = false);
+      }
+    }
+  }
+
+  /// Show confirmation dialog when ingredient is found
+  Future<bool?> _showIngredientConfirmationDialog(
+    String originalInput,
+    IngredientSearchResult searchResult,
+  ) async {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _IngredientConfirmationDialog(
+        originalInput: originalInput,
+        searchResult: searchResult,
+      ),
+    );
+  }
+
+  /// Show error dialog when ingredient is not found
+  void _showIngredientNotFoundDialog(String ingredientName) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        backgroundColor: const Color(0xFF1A1A2E),
+        title: Row(
+          children: [
+            Icon(Icons.error_outline, color: Colors.red.shade600),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Ingredient Not Recognized',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '"$ingredientName"',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'This ingredient was not found in the Spoonacular database. '
+              'Please check the spelling or try a different name.',
+              style: TextStyle(
+                color: Colors.grey.shade400,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   /// Show item options
@@ -862,3 +1101,246 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 }
+
+/// Ingredient Confirmation Dialog for Home Screen
+/// Shows the validated ingredient with image and asks for user confirmation
+class _IngredientConfirmationDialog extends StatelessWidget {
+  final String originalInput;
+  final IngredientSearchResult searchResult;
+
+  const _IngredientConfirmationDialog({
+    required this.originalInput,
+    required this.searchResult,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      backgroundColor: const Color(0xFF1A1A2E),
+      contentPadding: EdgeInsets.zero,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header with checkmark
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50.withValues(alpha: 0.1),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade100.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check,
+                    color: Colors.green.shade400,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                const Expanded(
+                  child: Text(
+                    'Ingredient Found!',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                // Ingredient image
+                if (searchResult.imageUrl != null)
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        width: 2,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.network(
+                        searchResult.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey.shade800,
+                            child: Icon(
+                              Icons.restaurant,
+                              size: 48,
+                              color: Colors.grey.shade600,
+                            ),
+                          );
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            color: Colors.grey.shade900,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                                color: Colors.orange,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade800,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.restaurant,
+                      size: 48,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+
+                const SizedBox(height: 16),
+
+                // Original input
+                Text(
+                  'You entered: "$originalInput"',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade400,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 8),
+
+                // Official name
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.verified,
+                      size: 16,
+                      color: Colors.green.shade400,
+                    ),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        searchResult.name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 8),
+
+                // Category/aisle info
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.blue.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.category,
+                        size: 14,
+                        color: Colors.blue.shade300,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        searchResult.aisle,
+                        style: TextStyle(
+                          color: Colors.blue.shade200,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        // Cancel button
+        TextButton.icon(
+          onPressed: () => Navigator.pop(context, false),
+          icon: const Icon(Icons.close, size: 18),
+          label: const Text('Cancel'),
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.grey.shade400,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+          ),
+        ),
+
+        // Add button
+        ElevatedButton.icon(
+          onPressed: () => Navigator.pop(context, true),
+          icon: const Icon(Icons.add_circle, size: 18),
+          label: const Text('Add Ingredient'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: 12,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 8),
+      ],
+    );
+  }
+}
+
