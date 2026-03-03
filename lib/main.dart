@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mobile_project/models/recipe.dart';
+import 'package:mobile_project/screens/grocery_page.dart';
+import 'package:mobile_project/screens/recipe_suggestion_screen.dart';
 import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
 import 'providers/grocery_provider.dart';
@@ -27,7 +30,7 @@ class SmartKitchenApp extends StatelessWidget {
         title: 'Smart Kitchen Assistant',
         debugShowCheckedModeBanner: false,
         theme: _buildTheme(),
-        home: const HomeScreen(),
+        home: const MainNavigation(),
       ),
     );
   }
@@ -69,9 +72,7 @@ class SmartKitchenApp extends StatelessWidget {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
         ),
       ),
 
@@ -89,17 +90,11 @@ class SmartKitchenApp extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(
-            color: Color(0xFF4FC3F7),
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: Color(0xFF4FC3F7), width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(
-            color: Color(0xFFEF5350),
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: Color(0xFFEF5350), width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
@@ -113,10 +108,7 @@ class SmartKitchenApp extends StatelessWidget {
           backgroundColor: const Color(0xFF4FC3F7),
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 14,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -127,39 +119,27 @@ class SmartKitchenApp extends StatelessWidget {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: const Color(0xFF4FC3F7),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 8,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         ),
       ),
 
       // Icon Button Theme
       iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(
-          foregroundColor: Colors.white,
-        ),
+        style: IconButton.styleFrom(foregroundColor: Colors.white),
       ),
 
       // SnackBar Theme
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: const Color(0xFF1A1A2E),
-        contentTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        contentTextStyle: const TextStyle(color: Colors.white, fontSize: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
 
       // Dialog Theme
       dialogTheme: DialogThemeData(
         backgroundColor: const Color(0xFF1A1A2E),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
 
       // Bottom Sheet Theme
@@ -167,9 +147,7 @@ class SmartKitchenApp extends StatelessWidget {
         backgroundColor: Colors.transparent,
         modalBackgroundColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(24),
-          ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
       ),
 
@@ -180,22 +158,16 @@ class SmartKitchenApp extends StatelessWidget {
       ),
 
       // ListTile Theme
-      listTileTheme: const ListTileThemeData(
-        iconColor: Color(0xFF4FC3F7),
-      ),
+      listTileTheme: const ListTileThemeData(iconColor: Color(0xFF4FC3F7)),
 
       // Chip Theme
       chipTheme: ChipThemeData(
         backgroundColor: Colors.white.withValues(alpha: 0.1),
         selectedColor: const Color(0xFF4FC3F7).withValues(alpha: 0.3),
-        labelStyle: const TextStyle(
-          color: Colors.white,
-        ),
+        labelStyle: const TextStyle(color: Colors.white),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
         ),
       ),
 
@@ -210,9 +182,69 @@ class SmartKitchenApp extends StatelessWidget {
         backgroundColor: const Color(0xFF4FC3F7),
         foregroundColor: Colors.white,
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+    );
+  }
+}
+
+class MainNavigation extends StatefulWidget {
+  const MainNavigation({super.key});
+
+  @override
+  State<MainNavigation> createState() => _MainNavigationState();
+}
+
+class RecipeNavWrapper extends StatelessWidget {
+    const RecipeNavWrapper({super.key});
+
+    @override
+    Widget build(BuildContext context) {
+      final provider = context.watch<GroceryProvider>();
+      return RecipeSuggestionScreen(
+        ingredients: provider.unpurchasedItems.map((item) => item.name).toList(),
+      );
+    }
+  }
+
+
+class _MainNavigationState extends State<MainNavigation> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _pages = [
+    HomeScreen(),
+    GroceryPage(),
+    RecipeNavWrapper(),
+  ];
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(index: _selectedIndex, children: _pages),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.local_grocery_store_outlined),
+            selectedIcon: Icon(Icons.local_grocery_store),
+            label: 'Grocery',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.restaurant_menu_outlined),
+            selectedIcon: Icon(Icons.restaurant_menu),
+            label: 'Menu',
+          ),
+        ],
       ),
     );
   }

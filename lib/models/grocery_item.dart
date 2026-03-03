@@ -114,7 +114,7 @@ class GroceryItem {
 
 /// Grocery List Category for better organization
 enum GroceryCategory {
-  produce('🥬', 'Produce', Colors.green),
+  produce('🍅', 'Vegetables & Fruits', Colors.green),
   dairy('🥛', 'Dairy', Colors.blue),
   meat('🥩', 'Meat', Colors.red),
   pantry('🥫', 'Pantry', Colors.orange),
