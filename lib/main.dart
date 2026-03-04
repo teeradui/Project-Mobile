@@ -40,16 +40,20 @@ class SmartKitchenApp extends StatelessWidget {
 
   /// Build app theme with custom colors
   ThemeData _buildTheme() {
+    const Color primaryAmber    = Color(0xFFFFBF00);
+    const Color forestGreen     = Color(0xFF0F5741);
+    const Color creamBackground = Color(0xFFF5EFDF);
+
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
+      brightness: Brightness.light,
 
       // Color Scheme
-      colorScheme: ColorScheme.dark(
-        primary: const Color(0xFF4FC3F7),
-        secondary: const Color(0xFFFFB74D),
+      colorScheme: ColorScheme.light(
+        primary: primaryAmber,
+        secondary: forestGreen,
         tertiary: const Color(0xFF81C784),
-        surface: const Color(0xFF1A1A2E),
+        surface: creamBackground,
         error: const Color(0xFFEF5350),
         onPrimary: Colors.white,
         onSecondary: Colors.white,
@@ -59,46 +63,53 @@ class SmartKitchenApp extends StatelessWidget {
       ),
 
       // Scaffold Theme
-      scaffoldBackgroundColor: const Color(0xFF1A1A2E),
+      scaffoldBackgroundColor: creamBackground,
 
       // AppBar Theme
       appBarTheme: const AppBarTheme(
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
+        iconTheme: IconThemeData(color: forestGreen),
+        titleTextStyle: TextStyle(
+          color: forestGreen,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
       ),
 
       // Card Theme
       cardTheme: CardThemeData(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: Colors.white.withValues(alpha: 0.75),
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+          side: BorderSide(color: primaryAmber.withValues(alpha: 0.25)),
         ),
       ),
 
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.05),
+        fillColor: creamBackground.withValues(alpha: 0.8),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(color: primaryAmber.withValues(alpha: 0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFF4FC3F7), width: 2),
+          borderSide: const BorderSide(color: primaryAmber, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: Color(0xFFEF5350), width: 2),
         ),
+        hintStyle: TextStyle(color: forestGreen.withValues(alpha: 0.45)),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 16,
@@ -108,7 +119,7 @@ class SmartKitchenApp extends StatelessWidget {
       // Elevated Button Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF4FC3F7),
+          backgroundColor: primaryAmber,
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
@@ -121,27 +132,27 @@ class SmartKitchenApp extends StatelessWidget {
       // Text Button Theme
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: const Color(0xFF4FC3F7),
+          foregroundColor: forestGreen,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         ),
       ),
 
       // Icon Button Theme
       iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(foregroundColor: Colors.white),
+        style: IconButton.styleFrom(foregroundColor: forestGreen),
       ),
 
       // SnackBar Theme
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: forestGreen,
         contentTextStyle: const TextStyle(color: Colors.white, fontSize: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
 
       // Dialog Theme
       dialogTheme: DialogThemeData(
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: creamBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
 
@@ -156,36 +167,53 @@ class SmartKitchenApp extends StatelessWidget {
 
       // Divider Theme
       dividerTheme: DividerThemeData(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: primaryAmber.withValues(alpha: 0.1),
         thickness: 1,
       ),
 
       // ListTile Theme
-      listTileTheme: const ListTileThemeData(iconColor: Color(0xFF4FC3F7)),
+      listTileTheme: const ListTileThemeData(iconColor: forestGreen),
 
       // Chip Theme
       chipTheme: ChipThemeData(
-        backgroundColor: Colors.white.withValues(alpha: 0.1),
-        selectedColor: const Color(0xFF4FC3F7).withValues(alpha: 0.3),
-        labelStyle: const TextStyle(color: Colors.white),
+        backgroundColor: primaryAmber.withValues(alpha: 0.12),
+        selectedColor: primaryAmber.withValues(alpha: 0.35),
+        labelStyle: const TextStyle(color: forestGreen),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+          side: BorderSide(color: primaryAmber.withValues(alpha: 0.3)),
         ),
       ),
 
       // Progress Indicator Theme
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: Color(0xFF4FC3F7),
-        linearTrackColor: Color(0xFF1A1A2E),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: primaryAmber,
+        linearTrackColor: primaryAmber.withValues(alpha: 0.15),
       ),
 
       // Floating Action Button Theme
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: const Color(0xFF4FC3F7),
+        backgroundColor: primaryAmber,
         foregroundColor: Colors.white,
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: forestGreen,
+        indicatorColor: primaryAmber.withValues(alpha: 0.25),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: primaryAmber);
+          }
+          return IconThemeData(color: Colors.white.withValues(alpha: 0.6));
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(color: primaryAmber, fontWeight: FontWeight.w600,fontSize: 12);
+          }
+          return TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12);
+        }),
       ),
     );
   }

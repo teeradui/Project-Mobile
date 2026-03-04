@@ -18,8 +18,10 @@ class GroceryPage extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('MyGrocery')),
-      body: items.isEmpty
+      appBar: AppBar(title: const Text('My Grocery')),
+      body: Container(
+      decoration: _buildBackgroundDecoration(), 
+      child: items.isEmpty
           ? _buildEmptyState()
           : ListView(
               padding: const EdgeInsets.all(16.0),
@@ -32,7 +34,7 @@ class GroceryPage extends StatelessWidget {
                 );
               }).toList(),
             ),
-    );
+    ));
   }
 
   Widget _buildEmptyState() {
@@ -107,6 +109,20 @@ class GroceryPage extends StatelessWidget {
           icon: const Icon(Icons.delete_outline),
           onPressed: () => provider.deleteItem(item.id),
         ),
+      ),
+    );
+  }
+
+  BoxDecoration _buildBackgroundDecoration() {
+    return const BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color(0xFFF5EFDF),
+          Color(0xFFEDE4CF),
+          Color(0xFFE3D7BB),
+        ],
       ),
     );
   }

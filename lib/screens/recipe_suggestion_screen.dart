@@ -48,9 +48,9 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF1A1A2E),
-              Color(0xFF16213E),
-              Color(0xFF0F3460),
+              Color(0xFFF5EFDF),
+              Color(0xFFEDE4CF),
+              Color(0xFFE3D7BB),
             ],
           ),
         ),
