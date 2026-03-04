@@ -7,6 +7,9 @@ import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
 import 'providers/grocery_provider.dart';
 
+// GlobalKey for accessing MainNavigation state from other widgets
+final GlobalKey<MainNavigationState> mainNavigationKey = GlobalKey<MainNavigationState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -33,7 +36,7 @@ class SmartKitchenApp extends StatelessWidget {
         title: 'Smart Kitchen Assistant',
         debugShowCheckedModeBanner: false,
         theme: _buildTheme(),
-        home: const MainNavigation(),
+        home: MainNavigation(key: mainNavigationKey),
       ),
     );
   }
@@ -195,7 +198,7 @@ class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
 
   @override
-  State<MainNavigation> createState() => _MainNavigationState();
+  State<MainNavigation> createState() => MainNavigationState();
 }
 
 class RecipeNavWrapper extends StatelessWidget {
@@ -206,12 +209,13 @@ class RecipeNavWrapper extends StatelessWidget {
       final provider = context.watch<GroceryProvider>();
       return RecipeSuggestionScreen(
         ingredients: provider.unpurchasedItems.map((item) => item.name).toList(),
+        shouldFetchOnLoad: false,
       );
     }
   }
 
 
-class _MainNavigationState extends State<MainNavigation> {
+class MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
@@ -219,6 +223,13 @@ class _MainNavigationState extends State<MainNavigation> {
     const GroceryPage(),
     const RecipeNavWrapper(),
   ];
+
+  /// Switch to Menu tab (index 2)
+  void switchToMenuTab() {
+    setState(() {
+      _selectedIndex = 2;
+    });
+  }
   
   @override
   Widget build(BuildContext context) {

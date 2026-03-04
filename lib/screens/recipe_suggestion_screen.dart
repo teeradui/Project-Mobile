@@ -10,8 +10,13 @@ import '../widgets/calorie_donut_chart.dart';
 /// Shows recipes based on available ingredients with API integration
 class RecipeSuggestionScreen extends StatefulWidget {
   final List<String> ingredients;
+  final bool shouldFetchOnLoad;
 
-  const RecipeSuggestionScreen({super.key, required this.ingredients});
+  const RecipeSuggestionScreen({
+    super.key,
+    required this.ingredients,
+    this.shouldFetchOnLoad = true,
+  });
 
   @override
   State<RecipeSuggestionScreen> createState() => _RecipeSuggestionScreenState();
@@ -23,10 +28,12 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch recipes from API after frame is rendered
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetchRecipes();
-    });
+    // Fetch recipes from API after frame is rendered (only if shouldFetchOnLoad is true)
+    if (widget.shouldFetchOnLoad) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _fetchRecipes();
+      });
+    }
   }
 
   Future<void> _fetchRecipes() async {

@@ -5,7 +5,7 @@ import 'package:shimmer/shimmer.dart';
 import '../models/grocery_item.dart';
 import '../providers/grocery_provider.dart';
 import '../services/spoonacular_service.dart';
-import 'recipe_suggestion_screen.dart';
+import '../main.dart' show mainNavigationKey;
 
 // Export the IngredientSearchResult for use in this file
 export '../services/spoonacular_service.dart' show IngredientSearchResult;
@@ -600,15 +600,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       child: ElevatedButton(
         onPressed: provider.totalItems > 0
-            ? () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RecipeSuggestionScreen(
-                      ingredients: provider.unpurchasedItems.map((e) => e.name).toList(),
-                    ),
-                  ),
-                );
+            ? () async {
+                // Fetch recipes first, then switch to Menu tab
+                await provider.fetchRecipesFromAPI();
+                // Use mainNavigationKey to switch to Menu tab (keeps nav bar visible)
+                mainNavigationKey.currentState?.switchToMenuTab();
               }
             : null,
         style: ElevatedButton.styleFrom(
