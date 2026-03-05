@@ -1,0 +1,15 @@
+--- a/lib/screens/home_screen.dart
++++ b/lib/screens/home_screen.dart
+@@ -727,8 +727,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+     setState(() => _voicePreviewText = '');
+     await voiceService.startListening(
+       onResult: (text) {
+-        if (mounted) setState(() => _voicePreviewText = text);
++        if (mounted) {
++          setState(() {
++            _voicePreviewText = text;
++            _textController.text = text; // Update TextField in real-time
++          });
++        }
+       },
+     );

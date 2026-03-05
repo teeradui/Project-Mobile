@@ -3,7 +3,11 @@
     "allow": [
       "Bash(flutter pub get:*)",
       "Bash(flutter analyze:*)",
-      "Bash(flutter clean:*)"
+      "Bash(flutter clean:*)",
+      "Bash(mv lib/screens/home_screen.dart.bak lib/screens/home_screen.dart)",
+      "Bash(rm fix_voice.sh)",
+      "Bash(python:*)",
+      "Bash(dart analyze lib/screens/home_screen.dart)"
     ]
   }
 }
