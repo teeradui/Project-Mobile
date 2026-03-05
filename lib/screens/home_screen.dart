@@ -84,69 +84,72 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   /// Build gradient background decoration
   BoxDecoration _buildBackgroundDecoration() {
-    return const BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Color(0xFFF5EFDF),
-          Color(0xFFEDE4CF),
-          Color(0xFFE3D7BB),
-        ],
-      ),
-    );
-  }
+  return const BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Color(0xFFF5EFDF), // cream
+        Color(0xFFEDE4CF),
+      ],
+    ),
+  );
+}
 
   /// Build app header
   Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.orange.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.orange.withValues(alpha: 0.4),
-                width: 1,
-              ),
-            ),
-            child: const Icon(
-              Icons.kitchen_rounded,
-              color: Colors.orange,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Smart Kitchen',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  'Voice Recipe Assistant',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white.withValues(alpha: 0.6),
-                    fontSize: 13,
-                  ),
-                ),
+  const forestGreen = Color(0xFF0F5741);
+  const primaryAmber = Color(0xFFFFBF00);
+
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+    child: Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                primaryAmber,
+                primaryAmber.withOpacity(0.8),
               ],
             ),
+            borderRadius: BorderRadius.circular(20),
           ),
-          _buildSettingsButton(context),
-        ],
-      ),
-    );
-  }
+          child: const Icon(
+            Icons.kitchen_rounded,
+            color: Colors.white,
+            size: 28,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Smart Kitchen',
+                style: GoogleFonts.poppins(
+                  color: forestGreen,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Text(
+                'Voice Recipe Assistant',
+                style: GoogleFonts.poppins(
+                  color: forestGreen.withOpacity(0.6),
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+        _buildSettingsButton(context),
+      ],
+    ),
+  );
+}
 
   /// Build settings button
   Widget _buildSettingsButton(BuildContext context) {
@@ -167,92 +170,65 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   /// Build ingredient count card
-  Widget _buildIngredientCountCard(BuildContext context, GroceryProvider provider) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.orange.withValues(alpha: 0.25),
-            Colors.orange.withValues(alpha: 0.15),
+  Widget _buildIngredientCountCard(
+    BuildContext context, GroceryProvider provider) {
+  const forestGreen = Color(0xFF0F5741);
+  const primaryAmber = Color(0xFFFFBF00);
+
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(24),
+      boxShadow: [
+        BoxShadow(
+          color: forestGreen.withOpacity(0.08),
+          blurRadius: 20,
+          offset: const Offset(0, 10),
+        ),
+      ],
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: primaryAmber.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Icon(
+            Icons.shopping_basket_outlined,
+            color: forestGreen,
+            size: 30,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Your Ingredients',
+              style: GoogleFonts.poppins(
+                color: forestGreen.withOpacity(0.7),
+                fontSize: 14,
+              ),
+            ),
+            Text(
+              '${provider.totalItems}',
+              style: GoogleFonts.poppins(
+                color: forestGreen,
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.orange.withValues(alpha: 0.3),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.orange.withValues(alpha: 0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.orange.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(
-              Icons.shopping_basket_outlined,
-              color: Colors.orange,
-              size: 32,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Your Ingredients',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${provider.totalItems} items',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (provider.totalItems > 0)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.green.withValues(alpha: 0.4),
-                ),
-              ),
-              child: Text(
-                'Ready to cook!',
-                style: GoogleFonts.poppins(
-                  color: Colors.green.shade300,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
 
   /// Build ingredient list
   Widget _buildIngredientList(BuildContext context, GroceryProvider provider) {
@@ -274,456 +250,372 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   /// Build empty state
   Widget _buildEmptyState(BuildContext context) {
-    return Container(
-      height: 200,
-      alignment: Alignment.center,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.mic_none,
-            size: 64,
-            color: Colors.orange.withValues(alpha: 0.4),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No ingredients yet',
-            style: GoogleFonts.poppins(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Tap the microphone to add ingredients',
-            style: GoogleFonts.poppins(
-              color: Colors.white.withValues(alpha: 0.3),
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  const forestGreen = Color(0xFF0F5741);
 
-  /// Build ingredient card
-  Widget _buildIngredientCard(BuildContext context, GroceryItem item, GroceryProvider provider) {
-    final category = GroceryCategory.getCategoryForItem(item.name);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withValues(alpha: 0.1),
-            Colors.white.withValues(alpha: 0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.mic_none,
+          size: 70,
+          color: forestGreen.withOpacity(0.3),
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
-          width: 1,
-        ),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: Container(
-          width: 45,
-          height: 45,
-          decoration: BoxDecoration(
-            color: category.color.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: category.color.withValues(alpha: 0.4),
-              width: 1,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              category.emoji,
-              style: const TextStyle(fontSize: 22),
-            ),
-          ),
-        ),
-        title: Text(
-          item.name,
+        const SizedBox(height: 20),
+        Text(
+          'No ingredients yet',
           style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontSize: 15,
+            color: forestGreen,
+            fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
         ),
-        subtitle: Text(
-          item.formattedAmount,
+        const SizedBox(height: 6),
+        Text(
+          'Tap the microphone to start adding',
           style: GoogleFonts.poppins(
-            color: Colors.white.withValues(alpha: 0.5),
-            fontSize: 12,
+            color: forestGreen.withOpacity(0.5),
+            fontSize: 13,
           ),
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            InkWell(
-              onTap: () => _showItemOptions(context, item, provider),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.more_vert,
-                  color: Colors.white,
-                  size: 18,
+      ],
+    ),
+  );
+}
+
+  /// Build ingredient card
+  Widget _buildIngredientCard(
+  BuildContext context,
+  GroceryItem item,
+  GroceryProvider provider,
+) {
+  final category = GroceryCategory.getCategoryForItem(item.name);
+  const forestGreen = Color(0xFF0F5741);
+
+  return Container(
+    margin: const EdgeInsets.only(bottom: 14),
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: [
+        BoxShadow(
+          color: forestGreen.withOpacity(0.06),
+          blurRadius: 18,
+          offset: const Offset(0, 8),
+        )
+      ],
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            color: category.color.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Center(
+            child: Text(category.emoji, style: const TextStyle(fontSize: 22)),
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.name,
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                  color: forestGreen,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                item.formattedAmount,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: forestGreen.withOpacity(0.5),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+        IconButton(
+          icon: const Icon(Icons.more_vert),
+          color: forestGreen.withOpacity(0.5),
+          onPressed: () =>
+              _showItemOptions(context, item, provider),
+        ),
+      ],
+    ),
+  );
+}
 
   /// Build input section
   Widget _buildInputSection(BuildContext context) {
-    final provider = context.watch<GroceryProvider>();
+  final provider = context.watch<GroceryProvider>();
+  final isListening = provider.voiceService.isListening;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.3),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-        ),
-        border: Border(
-          top: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-            width: 1,
-          ),
-        ),
+  const forestGreen = Color(0xFF0F5741);
+  const primaryAmber = Color(0xFFFFBF00);
+  const softCream = Color(0xFFF6F1E5);
+
+  return Container(
+    padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(36),
+        topRight: Radius.circular(36),
       ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Error message display
-            if (provider.errorMessage.isNotEmpty)
-              Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.red.withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        provider.errorMessage,
-                        style: GoogleFonts.poppins(
-                          color: Colors.red.shade200,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => provider.clearError(),
-                      child: const Icon(Icons.close, color: Colors.red, size: 16),
-                    ),
-                  ],
-                ),
-              ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.08),
+          blurRadius: 30,
+          offset: const Offset(0, -10),
+        ),
+      ],
+    ),
+    child: SafeArea(
+      top: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
 
-            // Text input field
+          /// ===== ERROR MESSAGE =====
+          if (provider.errorMessage.isNotEmpty)
             Container(
+              margin: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  width: 1,
-                ),
-              ),
-              child: TextField(
-                controller: _textController,
-                enabled: !_isValidating,
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontSize: 15,
-                ),
-                decoration: InputDecoration(
-                  hintText: _isValidating
-                      ? 'Validating ingredient...'
-                      : (_validateBeforeAdd
-                          ? 'Type ingredient to validate & add...'
-                          : 'Type or speak to add ingredients...'),
-                  hintStyle: GoogleFonts.poppins(
-                    color: Colors.white.withValues(alpha: 0.4),
-                    fontSize: 14,
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  suffixIcon: _isValidating
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.orange,
-                          ),
-                        )
-                      : IconButton(
-                          icon: const Icon(Icons.send, color: Colors.orange),
-                          onPressed: () => _submitText(context),
-                        ),
-                ),
-                onSubmitted: (_) => _submitText(context),
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // API Quota Indicator (when validation is enabled)
-            if (_validateBeforeAdd)
-              Consumer<SpoonacularService>(
-                builder: (context, service, _) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: service.hasQuotaAvailable
-                          ? Colors.green.withValues(alpha: 0.1)
-                          : Colors.red.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: service.hasQuotaAvailable
-                            ? Colors.green.withValues(alpha: 0.3)
-                            : Colors.red.withValues(alpha: 0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.api,
-                          size: 14,
-                          color: service.hasQuotaAvailable
-                              ? Colors.green.shade400
-                              : Colors.red.shade400,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'API Quota: ${service.remainingQuota}/150',
-                          style: GoogleFonts.poppins(
-                            fontSize: 11,
-                            color: Colors.white.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-
-            if (_validateBeforeAdd) const SizedBox(height: 8),
-
-            // Validation Toggle
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  width: 1,
-                ),
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.red.shade200),
               ),
               child: Row(
                 children: [
-                  Icon(
-                    _validateBeforeAdd ? Icons.verified : Icons.offline_bolt,
-                    size: 18,
-                    color: _validateBeforeAdd ? Colors.green.shade400 : Colors.orange.shade400,
-                  ),
-                  const SizedBox(width: 10),
+                  Icon(Icons.error_outline,
+                      color: Colors.red.shade400, size: 18),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      _validateBeforeAdd
-                          ? 'Validate ingredients before adding'
-                          : 'Quick add (skip validation)',
+                      provider.errorMessage,
                       style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: Colors.red.shade600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                  Switch(
-                    value: _validateBeforeAdd,
-                    onChanged: !_isValidating
-                        ? (value) {
-                            setState(() {
-                              _validateBeforeAdd = value;
-                            });
-                          }
-                        : null,
-                  ),
+                  GestureDetector(
+                    onTap: () => provider.clearError(),
+                    child: Icon(Icons.close,
+                        size: 16, color: Colors.red.shade400),
+                  )
                 ],
               ),
             ),
 
-            const SizedBox(height: 12),
-
-            // Voice recording button
-            _buildRecordButton(context, provider),
-          ],
-        ),
+          /// ===== TEXT FIELD WITH BUILT-IN MIC =====
+          /// ===== TEXT FIELD WITH MIC ON THE LEFT =====
+Container(
+  decoration: BoxDecoration(
+    color: softCream,
+    borderRadius: BorderRadius.circular(30),
+    border: Border.all(
+      color: isListening
+          ? Colors.red
+          : primaryAmber.withOpacity(0.4),
+      width: 1.5,
+    ),
+  ),
+  child: TextField(
+    controller: _textController,
+    enabled: !_isValidating,
+    style: GoogleFonts.poppins(
+      color: forestGreen,
+      fontSize: 15,
+      fontWeight: FontWeight.w500,
+    ),
+    decoration: InputDecoration(
+      hintText: _validateBeforeAdd
+          ? 'Type ingredient to validate & add...'
+          : 'Type or hold mic to speak...',
+      hintStyle: GoogleFonts.poppins(
+        color: forestGreen.withOpacity(0.4),
+        fontSize: 14,
       ),
-    );
-  }
+      border: InputBorder.none,
+      contentPadding:
+          const EdgeInsets.symmetric(vertical: 18),
 
-  /// Build "Calculate Recipes" button
-  Widget _buildCalculateButton(BuildContext context) {
-    final provider = context.watch<GroceryProvider>();
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-      child: ElevatedButton(
-        onPressed: provider.totalItems > 0
-            ? () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RecipeSuggestionScreen(
-                      ingredients: provider.unpurchasedItems.map((e) => e.name).toList(),
-                    ),
-                  ),
-                );
-              }
-            : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orange,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: Colors.grey.shade700,
-          disabledForegroundColor: Colors.grey.shade500,
-          padding: const EdgeInsets.symmetric(vertical: 18),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+      /// 🎤 MIC ON LEFT
+      prefixIcon: GestureDetector(
+        onTapDown: (_) => _startListening(context),
+        onTapUp: (_) => _stopListening(context),
+        onTapCancel: () => _stopListening(context),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isListening
+                ? Colors.red
+                : forestGreen,
+            boxShadow: isListening
+                ? [
+                    BoxShadow(
+                      color: Colors.red.withOpacity(0.6),
+                      blurRadius: 12,
+                      spreadRadius: 1,
+                    )
+                  ]
+                : [],
           ),
-          elevation: 4,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.restaurant_menu, size: 28),
-            const SizedBox(width: 12),
-            Text(
-              'Calculate Recipes',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+          child: Icon(
+            isListening ? Icons.mic : Icons.mic_none,
+            color: Colors.white,
+            size: 20,
+          ),
         ),
       ),
-    );
-  }
 
-  /// Build animated record button
-  Widget _buildRecordButton(BuildContext context, GroceryProvider provider) {
-    final isListening = provider.voiceService.isListening;
+      /// ➤ SEND BUTTON RIGHT
+      suffixIcon: !_isValidating
+          ? IconButton(
+              icon: const Icon(Icons.send),
+              color: primaryAmber,
+              onPressed: () => _submitText(context),
+            )
+          : null,
+    ),
+    onSubmitted: (_) => _submitText(context),
+  ),
+),
 
-    return GestureDetector(
-      onTapDown: (_) => _startListening(context),
-      onTapUp: (_) => _stopListening(context),
-      onTapCancel: () => _stopListening(context),
-      child: AnimatedBuilder(
-        animation: _pulseAnimation,
-        builder: (context, child) {
-          return Container(
-            height: 60,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isListening
-                    ? [Colors.red.shade400, Colors.red.shade600]
-                    : [Colors.orange.shade400, Colors.orange.shade600],
+          const SizedBox(height: 14),
+
+          /// ===== VALIDATION TOGGLE (CLEANER VERSION) =====
+          Row(
+            children: [
+              Icon(
+                _validateBeforeAdd
+                    ? Icons.verified_rounded
+                    : Icons.flash_on_rounded,
+                size: 18,
+                color: _validateBeforeAdd
+                    ? primaryAmber
+                    : forestGreen,
               ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: isListening
-                  ? [
-                      BoxShadow(
-                        color: Colors.red.withValues(alpha: 0.4),
-                        blurRadius: 20 * _pulseAnimation.value,
-                        spreadRadius: 5 * (_pulseAnimation.value - 1),
-                      ),
-                    ]
-                  : [
-                      BoxShadow(
-                        color: Colors.orange.withValues(alpha: 0.3),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-            ),
-            child: Center(
-              child: isListening
-                  ? _buildListeningIndicator()
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.mic, color: Colors.white, size: 24),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Hold to Speak',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  _validateBeforeAdd
+                      ? 'Validation Mode'
+                      : 'Quick Add Mode',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: forestGreen,
+                  ),
+                ),
+              ),
+              Switch(
+  value: _validateBeforeAdd,
+  onChanged: !_isValidating
+      ? (value) {
+          setState(() {
+            _validateBeforeAdd = value;
+          });
+        }
+      : null,
 
-  /// Build listening indicator
-  Widget _buildListeningIndicator() {
-    return Shimmer.fromColors(
-      baseColor: Colors.white,
-      highlightColor: Colors.white.withValues(alpha: 0.5),
-      period: const Duration(milliseconds: 800),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.mic, color: Colors.white, size: 24),
-          const SizedBox(width: 12),
-          Text(
-            'Listening...',
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+  thumbColor: MaterialStateProperty.resolveWith((states) {
+    if (states.contains(MaterialState.selected)) {
+      return primaryAmber; // ตอนเปิด = เหลือง
+    }
+    return forestGreen; // ตอนปิด = เขียว
+  }),
+
+  trackColor: MaterialStateProperty.resolveWith((states) {
+    if (states.contains(MaterialState.selected)) {
+      return primaryAmber.withOpacity(0.35);
+    }
+    return forestGreen.withOpacity(0.35);
+  }),
+
+  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+),
+            ],
           ),
         ],
       ),
-    );
+    ),
+  );
+}
+
+  /// Build "Calculate Recipes" button
+  Widget _buildCalculateButton(BuildContext context) {
+  final provider = context.watch<GroceryProvider>();
+
+  const forestGreen = Color(0xFF0F5741);
+
+  /// 👇 ถ้าไม่มี ingredient เลย ไม่ต้องแสดงปุ่ม
+  if (provider.totalItems == 0) {
+    return const SizedBox.shrink();
   }
+
+  return Container(
+    color: Colors.white,
+    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+    child: SafeArea(
+      top: false,
+      child: SizedBox(
+        height: 58,
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RecipeSuggestionScreen(
+                  ingredients: provider.unpurchasedItems
+                      .map((e) => e.name)
+                      .toList(),
+                ),
+              ),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: forestGreen,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.restaurant_menu, size: 22),
+              const SizedBox(width: 10),
+              Text(
+                'Calculate Recipes',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 
   /// Start voice listening
   void _startListening(BuildContext context) async {

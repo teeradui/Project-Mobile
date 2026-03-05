@@ -199,6 +199,22 @@ class SmartKitchenApp extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
 
+      switchTheme: SwitchThemeData(
+  thumbColor: WidgetStateProperty.resolveWith((states) {
+    if (states.contains(WidgetState.selected)) {
+      return primaryAmber; // ON = เหลือง
+    }
+    return forestGreen; // OFF = เขียว
+  }),
+  trackColor: WidgetStateProperty.resolveWith((states) {
+    if (states.contains(WidgetState.selected)) {
+      return primaryAmber.withValues(alpha: 0.4);
+    }
+    return forestGreen.withValues(alpha: 0.4);
+  }),
+  trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+),
+
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: forestGreen,
         indicatorColor: primaryAmber.withValues(alpha: 0.25),
