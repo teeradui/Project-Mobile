@@ -111,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Row(
         children: [
           Container(
-           /*padding: const EdgeInsets.all(12),
+            /*padding: const EdgeInsets.all(12),
            decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [primaryAmber, primaryAmber.withOpacity(0.8)],
@@ -124,21 +124,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               fit: BoxFit.contain,
             ),
           ),*/
-              width: 52,
-              height: 52,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [primaryAmber, primaryAmber.withOpacity(0.8)],
-                ),
-                borderRadius: BorderRadius.circular(16),
+            width: 52,
+            height: 52,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [primaryAmber, primaryAmber.withOpacity(0.8)],
               ),
-              child: Image.asset(
-                'assets/logo/7.png',
-                height: 36,
-                fit: BoxFit.contain,
-              ),
+              borderRadius: BorderRadius.circular(16),
             ),
+            child: Image.asset(
+              'assets/logo/7.png',
+              height: 36,
+              fit: BoxFit.contain,
+            ),
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -430,6 +430,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             /// ===== TEXT FIELD WITH BUILT-IN MIC =====
             /// ===== TEXT FIELD WITH MIC ON THE LEFT =====
             Container(
+              clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
                 color: softCream,
                 borderRadius: BorderRadius.circular(30),
@@ -457,6 +458,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     fontSize: 14,
                   ),
                   border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  focusedErrorBorder: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 18),
 
                   /// 🎤 MIC ON LEFT
@@ -987,19 +993,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     GroceryItem item,
     GroceryProvider provider,
   ) {
+    const forestGreen = Color(0xFF0F5741);
+    const warmCream = Color(0xFFF5EFDF);
+    const primaryAmber = Color(0xFFFFBF00);
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          border: Border(
-            top: BorderSide(
-              color: Colors.white.withValues(alpha: 0.1),
-              width: 1,
+          color: warmCream,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          boxShadow: [
+            BoxShadow(
+              color: forestGreen.withValues(alpha: 0.14),
+              blurRadius: 24,
+              offset: const Offset(0, -8),
             ),
-          ),
+          ],
         ),
         child: SafeArea(
           child: Column(
@@ -1010,16 +1021,32 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: forestGreen.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 14),
               ListTile(
-                leading: const Icon(Icons.edit_outlined, color: Colors.blue),
+                leading: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: primaryAmber.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.edit_outlined,
+                    color: forestGreen,
+                    size: 20,
+                  ),
+                ),
                 title: Text(
                   'Edit',
-                  style: GoogleFonts.poppins(color: Colors.white),
+                  style: GoogleFonts.poppins(
+                    color: forestGreen,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 onTap: () {
                   Navigator.pop(context);
@@ -1027,17 +1054,33 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                leading: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0624D).withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.delete_outline,
+                    color: Color(0xFFE0624D),
+                    size: 20,
+                  ),
+                ),
                 title: Text(
                   'Delete',
-                  style: GoogleFonts.poppins(color: Colors.white),
+                  style: GoogleFonts.poppins(
+                    color: forestGreen,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 onTap: () {
                   provider.deleteItem(item.id);
                   Navigator.pop(context);
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 14),
             ],
           ),
         ),
@@ -1051,6 +1094,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     GroceryItem item,
     GroceryProvider provider,
   ) {
+    const forestGreen = Color(0xFF0F5741);
+    const warmCream = Color(0xFFF5EFDF);
+    const primaryAmber = Color(0xFFFFBF00);
+
     final nameController = TextEditingController(text: item.name);
     final amountController = TextEditingController(
       text: item.amount.toString(),
@@ -1059,64 +1106,133 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          'Edit Ingredient',
-          style: GoogleFonts.poppins(color: Colors.white),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildEditField(nameController, 'Name', Icons.label_outline),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildEditField(
-                    amountController,
-                    'Qty',
-                    Icons.format_list_numbered,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildEditField(
-                    unitController,
-                    'Unit',
-                    Icons.straighten,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.poppins(color: Colors.grey),
-            ),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
+          decoration: BoxDecoration(
+            color: warmCream,
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: forestGreen.withValues(alpha: 0.15),
+                blurRadius: 26,
+                offset: const Offset(0, 14),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              provider.updateItem(
-                item.copyWith(
-                  name: nameController.text,
-                  amount: double.tryParse(amountController.text) ?? item.amount,
-                  unit: unitController.text,
-                ),
-              );
-              Navigator.pop(context);
-            },
-            child: Text(
-              'Save',
-              style: GoogleFonts.poppins(color: Colors.orange),
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: primaryAmber.withValues(alpha: 0.22),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.edit_note_rounded,
+                      color: forestGreen,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Edit Ingredient',
+                    style: GoogleFonts.poppins(
+                      color: forestGreen,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              _buildEditField(nameController, 'Name', Icons.label_outline),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildEditField(
+                      amountController,
+                      'Qty',
+                      Icons.format_list_numbered,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _buildEditField(
+                      unitController,
+                      'Unit',
+                      Icons.straighten,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        foregroundColor: forestGreen.withValues(alpha: 0.7),
+                        padding: const EdgeInsets.symmetric(vertical: 11),
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () {
+                        provider.updateItem(
+                          item.copyWith(
+                            name: nameController.text,
+                            amount:
+                                double.tryParse(amountController.text) ??
+                                item.amount,
+                            unit: unitController.text,
+                          ),
+                        );
+                        Navigator.pop(context);
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: primaryAmber.withValues(alpha: 0.3),
+                        foregroundColor: forestGreen,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 11),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(
+                            color: primaryAmber.withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        'Save',
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -1127,23 +1243,37 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     String label,
     IconData icon,
   ) {
+    const forestGreen = Color(0xFF0F5741);
+    const primaryAmber = Color(0xFFFFBF00);
+
     return TextField(
       controller: controller,
-      style: GoogleFonts.poppins(color: Colors.white),
+      style: GoogleFonts.poppins(
+        color: forestGreen,
+        fontWeight: FontWeight.w500,
+      ),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: GoogleFonts.poppins(
-          color: Colors.white.withValues(alpha: 0.5),
+          color: forestGreen.withValues(alpha: 0.5),
         ),
-        prefixIcon: Icon(icon, color: Colors.white.withValues(alpha: 0.5)),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        filled: true,
+        fillColor: Colors.white.withValues(alpha: 0.9),
+        prefixIcon: Icon(icon, color: forestGreen.withValues(alpha: 0.55)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: forestGreen.withValues(alpha: 0.1)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.orange),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: primaryAmber.withValues(alpha: 0.8),
+            width: 1.4,
+          ),
         ),
       ),
     );
