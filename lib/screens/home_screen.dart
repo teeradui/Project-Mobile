@@ -152,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-// Build ingredient count card
+  // Build ingredient count card
   Widget _buildIngredientCountCard(
     BuildContext context,
     GroceryProvider provider,
@@ -242,7 +242,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.add_circle_outline_rounded, size: 80, color: forestGreen.withOpacity(0.3)),
+          Icon(
+            Icons.add_circle_outline_rounded,
+            size: 80,
+            color: forestGreen.withOpacity(0.3),
+          ),
           const SizedBox(height: 20),
           Text(
             'No adding yet',

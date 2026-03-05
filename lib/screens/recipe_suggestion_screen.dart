@@ -319,9 +319,8 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: _warmCream.withValues(alpha: 0.45),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: _forestGreen.withValues(alpha: 0.08)),
             ),
             child: Wrap(
               spacing: 6,
@@ -365,25 +364,10 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 84,
-            height: 84,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: _forestGreen.withValues(alpha: 0.08),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.restaurant_outlined,
-              size: 44,
-              color: _forestGreen.withValues(alpha: 0.7),
-            ),
+          Icon(
+            Icons.restaurant_outlined,
+            size: 80,
+            color: _forestGreen.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
           Text(
@@ -393,14 +377,16 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 6),
           Text(
-            'No matching recipes yet. Try adding more ingredients.',
+            'No matching recipes. \nTry adding more ingredients.',
             style: GoogleFonts.poppins(
               color: _forestGreen.withValues(alpha: 0.55),
               fontSize: 14,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
