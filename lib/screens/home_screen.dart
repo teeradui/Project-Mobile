@@ -167,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-// Build ingredient count card
+  // Build ingredient count card
   Widget _buildIngredientCountCard(
     BuildContext context,
     GroceryProvider provider,
@@ -257,7 +257,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.add_circle_outline_rounded, size: 80, color: forestGreen.withOpacity(0.3)),
+          Icon(
+            Icons.add_circle_outline_rounded,
+            size: 80,
+            color: forestGreen.withOpacity(0.3),
+          ),
           const SizedBox(height: 20),
           Text(
             'No adding yet',
@@ -854,50 +858,125 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   /// Show error dialog when ingredient is not found
   void _showIngredientNotFoundDialog(String ingredientName) {
+    const forestGreen = Color(0xFF0F5741);
+    const warmCream = Color(0xFFF5EFDF);
+    const primaryAmber = Color(0xFFFFBF00);
+
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: const Color(0xFF1A1A2E),
-        title: Row(
-          children: [
-            Icon(Icons.error_outline, color: Colors.red.shade600),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                'Ingredient Not Recognized',
-                style: TextStyle(color: Colors.white),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+          decoration: BoxDecoration(
+            color: warmCream,
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: forestGreen.withValues(alpha: 0.15),
+                blurRadius: 28,
+                offset: const Offset(0, 14),
               ),
+            ],
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.65),
+              width: 1.2,
             ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '"$ingredientName"',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'This ingredient was not found in the Spoonacular database. '
-              'Please check the spelling or try a different name.',
-              style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
           ),
-        ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE0624D).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.error_outline_rounded,
+                      color: Color(0xFFE0624D),
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Ingredient Not Recognized',
+                      style: GoogleFonts.poppins(
+                        color: forestGreen,
+                        fontSize: 22,
+                        height: 1.15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '"$ingredientName"',
+                  style: GoogleFonts.poppins(
+                    color: forestGreen,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'This ingredient was not found in the Spoonacular database. '
+                'Please check the spelling or try a different name.',
+                style: GoogleFonts.poppins(
+                  color: forestGreen.withValues(alpha: 0.72),
+                  fontSize: 14,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: primaryAmber.withValues(alpha: 0.28),
+                    foregroundColor: forestGreen,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 11),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: primaryAmber.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    'Got it',
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

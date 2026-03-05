@@ -2,7 +2,7 @@
 /// IMPORTANT: Keep this file secure and never commit it with a real API key
 class ApiConfig {
   /// Gemini API Key for grocery item extraction
-  static const String geminiApiKey = 'AIzaSyDm82-gONGji37YPSafRDVDI2rwnAmxWlE';
+  static const String geminiApiKey = 'AIzaSyBr3ykbQIPgcWQGMw5bRDdaVAjsizYr-Yc';
 
   /// Spoonacular API Key for ingredient parsing and nutrition
   static const String spoonacularApiKey = '27bebe2baaf149449c2c707d07694fc1';
@@ -15,7 +15,7 @@ class ApiConfig {
   /// Check if Gemini API is configured
   static bool get isGeminiConfigured =>
       geminiApiKey.isNotEmpty &&
-      geminiApiKey != 'AIzaSyDm82-gONGji37YPSafRDVDI2rwnAmxWlE';
+      geminiApiKey != 'AIzaSyBr3ykbQIPgcWQGMw5bRDdaVAjsizYr-Yc';
 
   /// Check if Spoonacular API is configured
   static bool get isSpoonacularConfigured =>

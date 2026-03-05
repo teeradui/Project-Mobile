@@ -77,8 +77,20 @@ class GroceryProvider extends ChangeNotifier {
     }
 
     await _loadFromPreferences();
-    await _voiceService.initialize();
-    await _voiceService.checkMicrophonePermission();
+
+    // Initialize voice service with better error handling
+    final voiceInitialized = await _voiceService.initialize();
+    if (!voiceInitialized) {
+      _errorMessage = '⚠️ Voice not available: ${_voiceService.errorMessage}\nUse text input or real device';
+      debugPrint('❌ VoiceService failed: ${_voiceService.errorMessage}');
+    } else {
+      debugPrint('✅ VoiceService initialized successfully');
+    }
+
+    final permissionStatus = await _voiceService.checkMicrophonePermission();
+    debugPrint('🎤 Mic permission: $permissionStatus');
+
+    notifyListeners();
   }
 
   /// Set API Key for AI Service
@@ -101,8 +113,7 @@ class GroceryProvider extends ChangeNotifier {
 
     try {
       // Process through AI Service
-      final normalizedInput = _normalizeSentence(input);
-      final newItems = await _aiService.processInput(normalizedInput);  
+     final newItems = await _aiService.processInput(input);
 
       if (newItems.isEmpty) {
         _errorMessage = 'ไม่พบวัตถุดิบที่ถูกต้อง กรุณาลองใหม่';
@@ -124,36 +135,39 @@ class GroceryProvider extends ChangeNotifier {
     }
   }
 
-
-String _normalizeName(String word) {
+String _normalizeWord(String word) {
   word = word.toLowerCase().trim();
 
-  if (word.endsWith('ies')) {
+  // berries → berry
+  if (word.endsWith('ies') && word.length > 3) {
     return word.substring(0, word.length - 3) + 'y';
-  } else if (word.endsWith('es')) {
+  }
+
+  // boxes, dishes, watches → box, dish, watch
+  if (word.endsWith('es') &&
+      (word.endsWith('ses') ||
+       word.endsWith('shes') ||
+       word.endsWith('ches') ||
+       word.endsWith('xes') ||
+       word.endsWith('zes'))) {
     return word.substring(0, word.length - 2);
-  } else if (word.endsWith('s') && !word.endsWith('ss')) {
+  }
+
+  // apples → apple
+  if (word.endsWith('s') && !word.endsWith('ss')) {
     return word.substring(0, word.length - 1);
   }
 
   return word;
 }
 
-  String _normalizeSentence(String sentence) {
+String _normalizeName(String word) {
+  return _normalizeWord(word);
+}
+
+String _normalizeSentence(String sentence) {
   final words = sentence.toLowerCase().trim().split(' ');
-
-  final normalizedWords = words.map((word) {
-    if (word.endsWith('ies')) {
-      return word.substring(0, word.length - 3) + 'y';
-    } else if (word.endsWith('es')) {
-      return word.substring(0, word.length - 2);
-    } else if (word.endsWith('s') && !word.endsWith('ss')) {
-      return word.substring(0, word.length - 1);
-    }
-    return word;
-  });
-
-  return normalizedWords.join(' ');
+  return words.map(_normalizeWord).join(' ');
 }
   /// Add a single ingredient
 void _addItem(GroceryItem item) {
