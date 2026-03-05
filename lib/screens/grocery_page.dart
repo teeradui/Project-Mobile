@@ -155,6 +155,11 @@ class _GroceryPageState extends State<GroceryPage> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final primaryAmber = Theme.of(context).colorScheme.primary;
+    final forestGreen = Theme.of(context).colorScheme.secondary;
+    final creamBackground = Theme.of(context).colorScheme.surface;
+
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -162,14 +167,21 @@ class _GroceryPageState extends State<GroceryPage> {
           Icon(
             Icons.kitchen_rounded,
             size: 80,
-            color: Colors.orange.withValues(alpha: 0.3),
+            color: forestGreen.withOpacity(0.3),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 20),
+          Text('No ingredients yet',
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: forestGreen,
+              )),
+              SizedBox(height: 6),
           Text(
-            'Your ingredients list is empty!',
-            style: TextStyle(
+            'Your ingredients list is empty',
+            style: GoogleFonts.poppins(
               fontSize: 16,
-              color: Colors.grey.withValues(alpha: 0.8),
+              color: forestGreen.withOpacity(0.5),
             ),
           ),
         ],
