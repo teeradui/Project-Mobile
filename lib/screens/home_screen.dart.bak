@@ -574,11 +574,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         child: SizedBox(
           height: 58,
           child: ElevatedButton(
-            onPressed: () async {
-              // Fetch recipes first, then switch to Menu tab
-              await provider.fetchRecipesFromAPI();
-              // Use mainNavigationKey to switch to Menu tab (keeps nav bar visible)
-              mainNavigationKey.currentState?.switchToMenuTab();
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RecipeSuggestionScreen(
+                    ingredients: provider.unpurchasedItems
+                        .map((e) => e.name)
+                        .toList(),
+                  ),
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: forestGreen,
@@ -604,10 +610,47 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         ),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      child: ElevatedButton(
+        onPressed: provider.totalItems > 0
+            ? () async {
+                // Fetch recipes first, then switch to Menu tab
+                await provider.fetchRecipesFromAPI();
+                // Use mainNavigationKey to switch to Menu tab (keeps nav bar visible)
+                mainNavigationKey.currentState?.switchToMenuTab();
+              }
+            : null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.orange,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: Colors.grey.shade700,
+          disabledForegroundColor: Colors.grey.shade500,
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 4,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.restaurant_menu, size: 28),
+            const SizedBox(width: 12),
+            Text(
+              'Calculate Recipes',
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
-  Widget _buildRecordButton(BuildContext context, GroceryProvider provider) {
   }
+
+  /// Build animated record button
+  Widget _buildRecordButton(BuildContext context, GroceryProvider provider) {
     final isListening = provider.voiceService.isListening;
 
     return GestureDetector(
