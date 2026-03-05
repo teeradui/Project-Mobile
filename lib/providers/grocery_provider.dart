@@ -101,7 +101,8 @@ class GroceryProvider extends ChangeNotifier {
 
     try {
       // Process through AI Service
-      final newItems = await _aiService.processInput(input);
+      final normalizedInput = _normalizeSentence(input);
+      final newItems = await _aiService.processInput(normalizedInput);  
 
       if (newItems.isEmpty) {
         _errorMessage = 'ไม่พบวัตถุดิบที่ถูกต้อง กรุณาลองใหม่';
@@ -123,29 +124,61 @@ class GroceryProvider extends ChangeNotifier {
     }
   }
 
-  /// Add a single ingredient
-  void _addItem(GroceryItem item) {
-    // Check for duplicates
-    final existingIndex = _items.indexWhere(
-      (existing) =>
-          existing.name.toLowerCase() == item.name.toLowerCase() &&
-          existing.unit == item.unit &&
-          !existing.isPurchased,
-    );
 
-    if (existingIndex != -1) {
-      // Merge with existing item
-      final existing = _items[existingIndex];
-      _items[existingIndex] = existing.copyWith(
-        amount: existing.amount + item.amount,
-      );
-    } else {
-      // Add new item
-      _items.add(item);
-    }
+String _normalizeName(String word) {
+  word = word.toLowerCase().trim();
 
-    notifyListeners();
+  if (word.endsWith('ies')) {
+    return word.substring(0, word.length - 3) + 'y';
+  } else if (word.endsWith('es')) {
+    return word.substring(0, word.length - 2);
+  } else if (word.endsWith('s') && !word.endsWith('ss')) {
+    return word.substring(0, word.length - 1);
   }
+
+  return word;
+}
+
+  String _normalizeSentence(String sentence) {
+  final words = sentence.toLowerCase().trim().split(' ');
+
+  final normalizedWords = words.map((word) {
+    if (word.endsWith('ies')) {
+      return word.substring(0, word.length - 3) + 'y';
+    } else if (word.endsWith('es')) {
+      return word.substring(0, word.length - 2);
+    } else if (word.endsWith('s') && !word.endsWith('ss')) {
+      return word.substring(0, word.length - 1);
+    }
+    return word;
+  });
+
+  return normalizedWords.join(' ');
+}
+  /// Add a single ingredient
+void _addItem(GroceryItem item) {
+  final normalizedName = _normalizeName(item.name);
+
+  final existingIndex = _items.indexWhere(
+    (existing) =>
+        _normalizeName(existing.name) == normalizedName &&
+        existing.unit == item.unit &&
+        !existing.isPurchased,
+  );
+
+  if (existingIndex != -1) {
+    final existing = _items[existingIndex];
+    _items[existingIndex] = existing.copyWith(
+      amount: existing.amount + item.amount,
+    );
+  } else {
+    _items.add(
+      item.copyWith(name: normalizedName),
+    );
+  }
+
+  notifyListeners();
+}
 
   /// Add ingredient manually
   void addItemManually(GroceryItem item) {
