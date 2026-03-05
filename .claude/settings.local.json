@@ -7,7 +7,9 @@
       "Bash(mv lib/screens/home_screen.dart.bak lib/screens/home_screen.dart)",
       "Bash(rm fix_voice.sh)",
       "Bash(python:*)",
-      "Bash(dart analyze lib/screens/home_screen.dart)"
+      "Bash(dart analyze lib/screens/home_screen.dart)",
+      "Bash(awk 'NR>=304 && NR<=400' ai_service.dart)",
+      "Bash(grep -E \"\\(error |warning |lib\\\\\\\\\\)\")"
     ]
   }
 }

@@ -305,49 +305,23 @@ Return ONLY the JSON array, no explanation.
   List<GroceryItem> _tryLocalParsing(String input) {
     final List<GroceryItem> items = [];
 
-    // Split input by common separators first
-    final List<String> phrases = _splitPhrases(input);
-
-    // Process each phrase separately
-    for (final phrase in phrases) {
-      items.addAll(_parseSinglePhrase(phrase.trim()));
-    }
-
-    // If no items found, try simple word extraction
-    if (items.isEmpty) {
-      items.addAll(_parseSimpleWords(input));
-    }
-
-    return items;
-  }
-
-  /// Split input into separate phrases by separators
-  List<String> _splitPhrases(String input) {
-    // Split by common separators: comma, "and", "with", "plus", "&"
-    final separators = RegExp(r'\s*,\s*|\s+and\s+|\s+with\s+|\s+plus\s+|\s*&\s*', caseSensitive: false);
-    
-    final phrases = input.split(separators);
-    return phrases.where((phrase) => phrase.trim().isNotEmpty).toList();
-  }
-
-  /// Parse a single phrase for ingredients
-  List<GroceryItem> _parseSinglePhrase(String phrase) {
-    final List<GroceryItem> items = [];
-
     // Thai pattern: "ไก่ 2 ตัว", "พริก 5 เม็ด"
     final thaiPattern = RegExp(
       r'([ก-๙\s]+)\s*(\d+(?:\.\d+)?)\s*(ตัว|เม็ด|กรัม|กิโล|ถ้วย|หัว|ลูก|ซอง|แพ็ค|ลิตร)?',
       caseSensitive: false,
     );
 
-    // English pattern with number words: "2 kg chicken", "one chicken", "5 apples"
-    final englishPattern = RegExp(
-      r'((?:\d+(?:\.\d+)?)|(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|a|an))\s*(kg|g|lb|oz|liter|ml|cup|pcs|pieces|dozen|pack|bag|bottle|cans?)?\s*(?:of\s+)?([a-zA-Z]+(?:\s+[a-zA-Z]+)*)',
-      caseSensitive: false,
-    );
+    // English pattern: "2 kg chicken", "5 apples"
+   final englishPattern = RegExp(
+  r'(\d+(?:\.\d+)?)\s*(kg|g|lb|oz|liter|ml|cup|pcs|pieces|dozen|pack|bag|bottle|cans?)?\s*(?:of\s+)?([a-zA-Z]+(?:\s+[a-zA-Z]+)*)',
+  caseSensitive: false,
+);
+
+    // Simple pattern: "chicken", "ไก่"
+    final simplePattern = RegExp(r'([a-zA-Zก-๙]+(?:\s+[a-zA-Zก-๙]+)*)', caseSensitive: false);
 
     // Try Thai pattern first
-    final thaiMatches = thaiPattern.allMatches(phrase);
+    final thaiMatches = thaiPattern.allMatches(input);
     for (final match in thaiMatches) {
       try {
         final name = _cleanItemName(match.group(1) ?? '');
@@ -368,11 +342,10 @@ Return ONLY the JSON array, no explanation.
     }
 
     // Try English pattern
-    final englishMatches = englishPattern.allMatches(phrase);
+    final englishMatches = englishPattern.allMatches(input);
     for (final match in englishMatches) {
       try {
-        final amountStr = match.group(1) ?? '1';
-        final amount = _parseAmount(amountStr);
+        final amount = double.tryParse(match.group(1) ?? '1') ?? 1;
         final unit = _normalizeUnit(match.group(2) ?? 'pcs');
         final name = _cleanItemName(match.group(3) ?? '');
 
@@ -389,49 +362,25 @@ Return ONLY the JSON array, no explanation.
       }
     }
 
-    return items;
-  }
+    // If no patterns matched, try simple word extraction
+    if (items.isEmpty) {
+      final simpleMatches = simplePattern.allMatches(input);
+      final words = simpleMatches.map((m) => m.group(1)!).toSet();
 
-  /// Parse simple words when no pattern matches
-  List<GroceryItem> _parseSimpleWords(String input) {
-    final List<GroceryItem> items = [];
-    final simplePattern = RegExp(r'([a-zA-Zก-๙]+(?:\s+[a-zA-Zก-๙]+)*)', caseSensitive: false);
-    final simpleMatches = simplePattern.allMatches(input);
-    final words = simpleMatches.map((m) => m.group(1)!).toSet();
-
-    for (final word in words) {
-      final cleaned = _cleanItemName(word);
-      if (cleaned.length >= 2 && _isValidIngredient(cleaned)) {
-        items.add(GroceryItem(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          name: cleaned,
-          amount: 1,
-          unit: 'pcs',
-        ));
+      for (final word in words) {
+        final cleaned = _cleanItemName(word);
+        if (cleaned.length >= 2 && _isValidIngredient(cleaned)) {
+          items.add(GroceryItem(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            name: cleaned,
+            amount: 1,
+            unit: 'pcs',
+          ));
+        }
       }
     }
 
     return items;
-  }
-
-  /// Parse amount string (number words or digits) to double
-  double _parseAmount(String amountStr) {
-    final normalized = amountStr.toLowerCase().trim();
-    
-    // Number words mapping
-    final numberWords = {
-      'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
-      'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
-      'eleven': 11, 'twelve': 12, 'a': 1, 'an': 1,
-    };
-
-    // Check if it's a number word
-    if (numberWords.containsKey(normalized)) {
-      return numberWords[normalized]!.toDouble();
-    }
-
-    // Try parsing as a number
-    return double.tryParse(amountStr) ?? 1.0;
   }
 
   /// Normalize unit names
