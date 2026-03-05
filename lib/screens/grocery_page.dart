@@ -111,7 +111,7 @@ class _GroceryPageState extends State<GroceryPage> {
               borderRadius: BorderRadius.circular(16),
               
             ),
-            child: Icon(Icons.set_meal_rounded, color: Colors.white, size: 28),
+            child: Icon(Icons.kitchen_rounded, color: Colors.white, size: 28),
           ),
           const SizedBox(width: 16),
 
@@ -129,7 +129,7 @@ class _GroceryPageState extends State<GroceryPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'All items in your kitchen!',
+                  'All items in your kitchen',
                   style: TextStyle(
                     fontSize: 13,
                     color: forestGreen.withValues(alpha: 0.6),
@@ -165,7 +165,7 @@ class _GroceryPageState extends State<GroceryPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.kitchen_rounded,
+            Icons.inventory_2_outlined,
             size: 80,
             color: forestGreen.withOpacity(0.3),
           ),
