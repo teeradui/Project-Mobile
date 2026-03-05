@@ -157,8 +157,8 @@ class VoiceService extends ChangeNotifier {
           // Emit to stream
           _onResultController.add(result.recognizedWords);
 
-          // Callback if provided
-          if (onResult != null && result.finalResult) {
+          // Emit both partial and final text so UI can update while speaking.
+          if (onResult != null && result.recognizedWords.trim().isNotEmpty) {
             onResult(result.recognizedWords);
           }
 

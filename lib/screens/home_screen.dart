@@ -448,7 +448,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 decoration: InputDecoration(
                   hintText: _validateBeforeAdd
                       ? 'Type ingredient to validate & add...'
-                      : 'Type or hold mic to speak...',
+                      : 'Type or tap mic to speak...',
                   hintStyle: GoogleFonts.poppins(
                     color: forestGreen.withOpacity(0.4),
                     fontSize: 14,
@@ -458,9 +458,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                   /// 🎤 MIC ON LEFT
                   prefixIcon: GestureDetector(
-                    onTapDown: (_) => _startListening(context),
-                    onTapUp: (_) => _stopListening(context),
-                    onTapCancel: () => _stopListening(context),
+                    onTap: () => _toggleListening(context),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       margin: const EdgeInsets.all(8),
@@ -606,14 +604,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
       ),
     );
-  Widget _buildRecordButton(BuildContext context, GroceryProvider provider) {
   }
+
+  Widget _buildRecordButton(BuildContext context, GroceryProvider provider) {
     final isListening = provider.voiceService.isListening;
 
     return GestureDetector(
-      onTapDown: (_) => _startListening(context),
-      onTapUp: (_) => _stopListening(context),
-      onTapCancel: () => _stopListening(context),
+      onTap: () => _toggleListening(context),
       child: AnimatedBuilder(
         animation: _pulseAnimation,
         builder: (context, child) {
@@ -651,7 +648,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         const Icon(Icons.mic, color: Colors.white, size: 24),
                         const SizedBox(width: 10),
                         Text(
-                          'Hold to Speak',
+                          'Tap to Speak',
                           style: GoogleFonts.poppins(
                             color: Colors.white,
                             fontSize: 16,
@@ -691,10 +688,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  void _toggleListening(BuildContext context) {
+    final isListening = context.read<GroceryProvider>().voiceService.isListening;
+    if (isListening) {
+      _stopListening(context);
+      return;
+    }
+    _startListening(context);
+  }
+
   /// Start voice listening
   void _startListening(BuildContext context) async {
-    final provider = context.read<GroceryProvider>();
-    final voiceService = provider.voiceService;
+    final voiceService = context.read<GroceryProvider>().voiceService;
 
     if (!voiceService.hasPermission) {
       final granted = await voiceService.requestMicrophonePermission();
@@ -712,14 +717,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
 
     await voiceService.startListening(
-      onResult: (text) async {
-        if (_validateBeforeAdd) {
-          // Validate the voice input
-          _textController.text = text;
-          await _validateAndAddIngredient(context);
-        } else {
-          provider.processInput(text, isVoice: true);
-        }
+      onResult: (text) {
+        // Voice input should populate the text field first.
+        _textController
+          ..text = text
+          ..selection = TextSelection.fromPosition(
+            TextPosition(offset: text.length),
+          );
       },
     );
 
