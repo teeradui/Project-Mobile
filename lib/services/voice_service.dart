@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:permission_handler/permission_handler.dart' as ph;
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt show SpeechListenOptions, ListenMode;
 
@@ -72,7 +72,7 @@ class VoiceService extends ChangeNotifier {
   /// Request microphone permission
   Future<bool> requestMicrophonePermission() async {
     try {
-      final status = await Permission.microphone.request();
+      final status = await ph.Permission.microphone.request();
 
       if (status.isGranted) {
         _hasPermission = true;
@@ -98,22 +98,22 @@ class VoiceService extends ChangeNotifier {
   }
 
   /// Check microphone permission status
-  Future<PermissionStatus> checkMicrophonePermission() async {
+  Future<ph.PermissionStatus> checkMicrophonePermission() async {
     try {
-      final status = await Permission.microphone.status;
+      final status = await ph.Permission.microphone.status;
       _hasPermission = status.isGranted;
       notifyListeners();
       return status;
     } catch (e) {
       _errorMessage = 'Failed to check permission: $e';
       notifyListeners();
-      return PermissionStatus.denied;
+      return ph.PermissionStatus.denied;
     }
   }
 
   /// Open app settings for permission
-  Future<void> openAppSettings() async {
-    await openAppSettings();
+  Future<bool> openAppSettings() async {
+    return await ph.openAppSettings();
   }
 
   /// Start listening to speech

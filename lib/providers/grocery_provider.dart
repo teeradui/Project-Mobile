@@ -77,8 +77,20 @@ class GroceryProvider extends ChangeNotifier {
     }
 
     await _loadFromPreferences();
-    await _voiceService.initialize();
-    await _voiceService.checkMicrophonePermission();
+
+    // Initialize voice service with better error handling
+    final voiceInitialized = await _voiceService.initialize();
+    if (!voiceInitialized) {
+      _errorMessage = '⚠️ Voice not available: ${_voiceService.errorMessage}\nUse text input or real device';
+      debugPrint('❌ VoiceService failed: ${_voiceService.errorMessage}');
+    } else {
+      debugPrint('✅ VoiceService initialized successfully');
+    }
+
+    final permissionStatus = await _voiceService.checkMicrophonePermission();
+    debugPrint('🎤 Mic permission: $permissionStatus');
+
+    notifyListeners();
   }
 
   /// Set API Key for AI Service
