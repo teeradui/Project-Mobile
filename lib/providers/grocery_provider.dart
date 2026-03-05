@@ -27,8 +27,10 @@ class GroceryProvider extends ChangeNotifier {
 
   // Getters
   List<GroceryItem> get items => List.unmodifiable(_items);
-  List<GroceryItem> get unpurchasedItems => _items.where((item) => !item.isPurchased).toList();
-  List<GroceryItem> get purchasedItems => _items.where((item) => item.isPurchased).toList();
+  List<GroceryItem> get unpurchasedItems =>
+      _items.where((item) => !item.isPurchased).toList();
+  List<GroceryItem> get purchasedItems =>
+      _items.where((item) => item.isPurchased).toList();
   int get totalItems => _items.length;
   int get purchasedCount => _items.where((item) => item.isPurchased).length;
   bool get isLoading => _isLoading;
@@ -43,16 +45,26 @@ class GroceryProvider extends ChangeNotifier {
   SpoonacularService get spoonacularService => _spoonacularService;
 
   // Recipe suggestions (hybrid: API first, fallback to local)
-  List<dynamic> get matchingRecipes => _fetchedRecipes.isNotEmpty ? _fetchedRecipes : RecipeDatabase.getMatchingRecipes(unpurchasedItems.map((e) => e.name).toList());
+  List<dynamic> get matchingRecipes => _fetchedRecipes.isNotEmpty
+      ? _fetchedRecipes
+      : RecipeDatabase.getMatchingRecipes(
+          unpurchasedItems.map((e) => e.name).toList(),
+        );
 
   int get recipeCount => matchingRecipes.length;
-  String? get apiError => _spoonacularService.errorMessage.isNotEmpty ? _spoonacularService.errorMessage : null;
+  String? get apiError => _spoonacularService.errorMessage.isNotEmpty
+      ? _spoonacularService.errorMessage
+      : null;
 
   // Category breakdown
   Map<GroceryCategory, List<GroceryItem>> get itemsByCategory {
     final map = <GroceryCategory, List<GroceryItem>>{};
     for (final category in GroceryCategory.values) {
-      map[category] = _items.where((item) => GroceryCategory.getCategoryForItem(item.name) == category).toList();
+      map[category] = _items
+          .where(
+            (item) => GroceryCategory.getCategoryForItem(item.name) == category,
+          )
+          .toList();
     }
     return map;
   }
@@ -141,6 +153,11 @@ class GroceryProvider extends ChangeNotifier {
     _saveToPreferences();
   }
 
+  void deleteItem(String id) {
+    _items.removeWhere((item) => item.id == id);
+    notifyListeners();
+  }
+
   /// Update ingredient
   void updateItem(GroceryItem updatedItem) {
     final index = _items.indexWhere((item) => item.id == updatedItem.id);
@@ -164,8 +181,8 @@ class GroceryProvider extends ChangeNotifier {
   }
 
   /// Delete ingredient
-  void deleteItem(String itemId) {
-    _items.removeWhere((item) => item.id == itemId);
+  void clearAllItems() {
+    _items.clear();
     notifyListeners();
     _saveToPreferences();
   }
@@ -194,10 +211,14 @@ class GroceryProvider extends ChangeNotifier {
   void sortItems(GrocerySortType sortType) {
     switch (sortType) {
       case GrocerySortType.nameAsc:
-        _items.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        _items.sort(
+          (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        );
         break;
       case GrocerySortType.nameDesc:
-        _items.sort((a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()));
+        _items.sort(
+          (a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()),
+        );
         break;
       case GrocerySortType.category:
         _items.sort((a, b) {
@@ -220,7 +241,11 @@ class GroceryProvider extends ChangeNotifier {
   /// Filter ingredients by category
   List<GroceryItem> filterByCategory(GroceryCategory? category) {
     if (category == null) return _items;
-    return _items.where((item) => GroceryCategory.getCategoryForItem(item.name) == category).toList();
+    return _items
+        .where(
+          (item) => GroceryCategory.getCategoryForItem(item.name) == category,
+        )
+        .toList();
   }
 
   /// Get ingredient by ID
@@ -236,7 +261,10 @@ class GroceryProvider extends ChangeNotifier {
   Future<void> _saveToPreferences() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('ingredients', jsonEncode(_items.map((e) => e.toJson()).toList()));
+      await prefs.setString(
+        'ingredients',
+        jsonEncode(_items.map((e) => e.toJson()).toList()),
+      );
     } catch (e) {
       debugPrint('Error saving to preferences: $e');
     }
@@ -251,8 +279,12 @@ class GroceryProvider extends ChangeNotifier {
       if (itemsJson != null) {
         final List<dynamic> decoded = jsonDecode(itemsJson);
         _items.clear();
-        _items.addAll(decoded.map((json) => GroceryItem(
-              id: json['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        _items.addAll(
+          decoded.map(
+            (json) => GroceryItem(
+              id:
+                  json['id'] ??
+                  DateTime.now().millisecondsSinceEpoch.toString(),
               name: json['name'] ?? '',
               amount: (json['amount'] as num).toDouble(),
               unit: json['unit'] ?? 'pcs',
@@ -261,7 +293,9 @@ class GroceryProvider extends ChangeNotifier {
                   ? DateTime.parse(json['createdAt'])
                   : DateTime.now(),
               isPurchased: json['isPurchased'] ?? false,
-            )));
+            ),
+          ),
+        );
       }
 
       notifyListeners();
@@ -286,17 +320,21 @@ class GroceryProvider extends ChangeNotifier {
       if (data['items'] != null) {
         _items.clear();
         for (var itemJson in data['items']) {
-          _items.add(GroceryItem(
-            id: itemJson['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
-            name: itemJson['name'] ?? '',
-            amount: (itemJson['amount'] as num).toDouble(),
-            unit: itemJson['unit'] ?? 'pcs',
-            price: (itemJson['price'] as num?)?.toDouble() ?? 0.0,
-            createdAt: itemJson['createdAt'] != null
-                ? DateTime.parse(itemJson['createdAt'])
-                : DateTime.now(),
-            isPurchased: itemJson['isPurchased'] ?? false,
-          ));
+          _items.add(
+            GroceryItem(
+              id:
+                  itemJson['id'] ??
+                  DateTime.now().millisecondsSinceEpoch.toString(),
+              name: itemJson['name'] ?? '',
+              amount: (itemJson['amount'] as num).toDouble(),
+              unit: itemJson['unit'] ?? 'pcs',
+              price: (itemJson['price'] as num?)?.toDouble() ?? 0.0,
+              createdAt: itemJson['createdAt'] != null
+                  ? DateTime.parse(itemJson['createdAt'])
+                  : DateTime.now(),
+              isPurchased: itemJson['isPurchased'] ?? false,
+            ),
+          );
         }
       }
 
@@ -354,14 +392,17 @@ class GroceryProvider extends ChangeNotifier {
         _fetchedRecipes.addAll(apiRecipes);
         _errorMessage = ''; // Clear error - API worked
 
-        debugPrint('✅ API call successful - stored ${apiRecipes.length} recipes');
+        debugPrint(
+          '✅ API call successful - stored ${apiRecipes.length} recipes',
+        );
         if (apiRecipes.isNotEmpty) {
           debugPrint('✅ First recipe: ${apiRecipes[0].title}');
         }
       } else {
         // API failed or quota exceeded - fallback to local database
         _fetchedRecipes.clear();
-        _errorMessage = 'ใช้สูตรอาหารแบบออฟไลน์ ${_spoonacularService.errorMessage}';
+        _errorMessage =
+            'ใช้สูตรอาหารแบบออฟไลน์ ${_spoonacularService.errorMessage}';
         debugPrint('❌ API call failed: $_errorMessage');
       }
 
@@ -380,7 +421,8 @@ class GroceryProvider extends ChangeNotifier {
   /// Clear API error and fallback message
   void clearApiError() {
     _spoonacularService.clearError();
-    if (_errorMessage.contains('ใช้สูตรอาหารแบบออฟไลน์') || _errorMessage.contains('Using offline recipes')) {
+    if (_errorMessage.contains('ใช้สูตรอาหารแบบออฟไลน์') ||
+        _errorMessage.contains('Using offline recipes')) {
       _errorMessage = '';
     }
     notifyListeners();
@@ -402,7 +444,9 @@ class GroceryProvider extends ChangeNotifier {
           'calorieBreakdown': detail.getCalorieBreakdown(),
           'ingredients': detail.extendedIngredients.map((e) => e.name).toList(),
           'usedIngredients': recipe.usedIngredients.map((e) => e.name).toList(),
-          'missedIngredients': recipe.missedIngredients.map((e) => e.name).toList(),
+          'missedIngredients': recipe.missedIngredients
+              .map((e) => e.name)
+              .toList(),
           'isFromAPI': true,
         };
       } else {
@@ -422,10 +466,13 @@ class GroceryProvider extends ChangeNotifier {
             recipe.usedIngredients,
             recipe.missedIngredients,
           ),
-          'ingredients': recipe.usedIngredients.map((e) => e.name).toList() +
-                          recipe.missedIngredients.map((e) => e.name).toList(),
+          'ingredients':
+              recipe.usedIngredients.map((e) => e.name).toList() +
+              recipe.missedIngredients.map((e) => e.name).toList(),
           'usedIngredients': recipe.usedIngredients.map((e) => e.name).toList(),
-          'missedIngredients': recipe.missedIngredients.map((e) => e.name).toList(),
+          'missedIngredients': recipe.missedIngredients
+              .map((e) => e.name)
+              .toList(),
           'isFromAPI': true,
         };
       }
@@ -460,12 +507,20 @@ class GroceryProvider extends ChangeNotifier {
 
     // Estimate for used ingredients (assume standard serving)
     for (var ing in usedIngredients) {
-      total += _getIngredientCalories(ing.name, ing.amount ?? 100, ing.unit ?? 'g');
+      total += _getIngredientCalories(
+        ing.name,
+        ing.amount ?? 100,
+        ing.unit ?? 'g',
+      );
     }
 
     // Add estimate for missed ingredients
     for (var ing in missedIngredients) {
-      total += _getIngredientCalories(ing.name, ing.amount ?? 100, ing.unit ?? 'g');
+      total += _getIngredientCalories(
+        ing.name,
+        ing.amount ?? 100,
+        ing.unit ?? 'g',
+      );
     }
 
     return total;
@@ -487,7 +542,11 @@ class GroceryProvider extends ChangeNotifier {
     // Process all ingredients
     final allIngredients = [...usedIngredients, ...missedIngredients];
     for (var ing in allIngredients) {
-      final calories = _getIngredientCalories(ing.name, ing.amount ?? 100, ing.unit ?? 'g');
+      final calories = _getIngredientCalories(
+        ing.name,
+        ing.amount ?? 100,
+        ing.unit ?? 'g',
+      );
       final category = _getIngredientCategory(ing.name);
       breakdown[category] = (breakdown[category] ?? 0) + calories;
     }
@@ -504,7 +563,12 @@ class GroceryProvider extends ChangeNotifier {
     final calorieMap = {
       // Protein
       'chicken': 165, 'beef': 250, 'pork': 242, 'fish': 140, 'shrimp': 99,
-      'salmon': 208, 'tuna': 130, 'crab': 97, 'prawn': 99, 'bacon': 541, 'ham': 145,
+      'salmon': 208,
+      'tuna': 130,
+      'crab': 97,
+      'prawn': 99,
+      'bacon': 541,
+      'ham': 145,
       'egg': 155, 'tofu': 76,
 
       // Dairy
@@ -571,35 +635,66 @@ class GroceryProvider extends ChangeNotifier {
     final lower = ingredientName.toLowerCase();
 
     // Protein
-    if (lower.contains('chicken') || lower.contains('beef') || lower.contains('pork') ||
-        lower.contains('fish') || lower.contains('shrimp') || lower.contains('prawn') ||
-        lower.contains('crab') || lower.contains('salmon') || lower.contains('tuna') ||
-        lower.contains('bacon') || lower.contains('ham') || lower.contains('sausage') ||
-        lower.contains('egg') || lower.contains('tofu')) {
+    if (lower.contains('chicken') ||
+        lower.contains('beef') ||
+        lower.contains('pork') ||
+        lower.contains('fish') ||
+        lower.contains('shrimp') ||
+        lower.contains('prawn') ||
+        lower.contains('crab') ||
+        lower.contains('salmon') ||
+        lower.contains('tuna') ||
+        lower.contains('bacon') ||
+        lower.contains('ham') ||
+        lower.contains('sausage') ||
+        lower.contains('egg') ||
+        lower.contains('tofu')) {
       return 'Protein';
     }
 
     // Carbs
-    if (lower.contains('rice') || lower.contains('pasta') || lower.contains('noodle') ||
-        lower.contains('bread') || lower.contains('flour') || lower.contains('potato') ||
-        lower.contains('corn') || lower.contains('cracker') || lower.contains('tortilla') ||
+    if (lower.contains('rice') ||
+        lower.contains('pasta') ||
+        lower.contains('noodle') ||
+        lower.contains('bread') ||
+        lower.contains('flour') ||
+        lower.contains('potato') ||
+        lower.contains('corn') ||
+        lower.contains('cracker') ||
+        lower.contains('tortilla') ||
         lower.contains('oats')) {
       return 'Carbs';
     }
 
     // Vegetables
-    if (lower.contains('tomato') || lower.contains('onion') || lower.contains('garlic') ||
-        lower.contains('carrot') || lower.contains('broccoli') || lower.contains('cabbage') ||
-        lower.contains('lettuce') || lower.contains('spinach') || lower.contains('mushroom') ||
-        lower.contains('pepper') || lower.contains('cucumber') || lower.contains('beans') ||
-        lower.contains('peas') || lower.contains('herb') || lower.contains('basil') ||
-        lower.contains('lemongrass') || lower.contains('galangal') || lower.contains('chili')) {
+    if (lower.contains('tomato') ||
+        lower.contains('onion') ||
+        lower.contains('garlic') ||
+        lower.contains('carrot') ||
+        lower.contains('broccoli') ||
+        lower.contains('cabbage') ||
+        lower.contains('lettuce') ||
+        lower.contains('spinach') ||
+        lower.contains('mushroom') ||
+        lower.contains('pepper') ||
+        lower.contains('cucumber') ||
+        lower.contains('beans') ||
+        lower.contains('peas') ||
+        lower.contains('herb') ||
+        lower.contains('basil') ||
+        lower.contains('lemongrass') ||
+        lower.contains('galangal') ||
+        lower.contains('chili')) {
       return 'Vegetables';
     }
 
     // Dairy
-    if (lower.contains('milk') || lower.contains('cheese') || lower.contains('butter') ||
-        lower.contains('cream') || lower.contains('yogurt') || lower.contains('coconut')) {
+    if (lower.contains('milk') ||
+        lower.contains('cheese') ||
+        lower.contains('butter') ||
+        lower.contains('cream') ||
+        lower.contains('yogurt') ||
+        lower.contains('coconut')) {
       return 'Dairy';
     }
 
