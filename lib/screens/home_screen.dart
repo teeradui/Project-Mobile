@@ -144,29 +144,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ],
             ),
           ),
-          _buildSettingsButton(context),
         ],
       ),
     );
   }
 
-  /// Build settings button
-  Widget _buildSettingsButton(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-          width: 1,
-        ),
-      ),
-      child: IconButton(
-        icon: const Icon(Icons.settings_outlined, color: Colors.white),
-        onPressed: () => _showSettingsDialog(context),
-      ),
-    );
-  }
+  
 
   /// Build ingredient count card
   Widget _buildIngredientCountCard(
@@ -258,13 +241,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.mic_none, size: 70, color: forestGreen.withOpacity(0.3)),
+          Icon(Icons.add_circle_outline_rounded, size: 80, color: forestGreen.withOpacity(0.3)),
           const SizedBox(height: 20),
           Text(
-            'No ingredients yet',
+            'No adding yet',
             style: GoogleFonts.poppins(
               color: forestGreen,
-              fontSize: 16,
+              fontSize: 20,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -273,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             'Tap the microphone to start adding',
             style: GoogleFonts.poppins(
               color: forestGreen.withOpacity(0.5),
-              fontSize: 13,
+              fontSize: 16,
             ),
           ),
         ],
