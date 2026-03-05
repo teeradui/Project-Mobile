@@ -86,7 +86,7 @@ VALID FOOD CATEGORIES:
 - Vegetables: tomato, onion, garlic, carrot, broccoli, ถั่ว, ผัก, มะเขือ, พริก
 - Meat: chicken, pork, beef, fish, shrimp, ไก่, หมู, เนื้อ, ปลา, กุ้ง
 - Dairy: milk, cheese, butter, eggs, นม, ไข่
-- Fruits: apple, banana, orange, ส้ม, กล้วย, มะม่วง
+- Fruits: apple, banana, orange,'berry', 'berries' ส้ม, กล้วย, มะม่วง
 - Grains: rice, pasta, bread, ข้าว, บะหมี่, ขนมปัง
 - Condiments: salt, sugar, oil, sauce, เกลือ, น้ำปลา, ซอส
 
@@ -184,11 +184,16 @@ Return ONLY the JSON array, no explanation.
     }
 
     // Check if it's a plural of a valid ingredient
-    if (itemName.endsWith('s')) {
-      final singular = itemName.substring(0, itemName.length - 1);
-      return _validIngredients.contains(singular);
-    }
+  // Handle plural forms
+  if (itemName.endsWith('ies') && itemName.length > 3) {
+    final singular = itemName.substring(0, itemName.length - 3) + 'y';
+    if (_validIngredients.contains(singular)) return true;
+  }
 
+  if (itemName.endsWith('s') && !itemName.endsWith('ss')) {
+    final singular = itemName.substring(0, itemName.length - 1);
+    if (_validIngredients.contains(singular)) return true;
+  }
     // If not found in list, use basic food keyword check
     final foodKeywords = [
       'meat', 'fish', 'chicken', 'pork', 'beef', 'shrimp', 'crab',
