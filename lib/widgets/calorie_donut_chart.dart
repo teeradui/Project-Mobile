@@ -218,10 +218,12 @@ class _DonutChartPainter extends CustomPainter {
 /// Shows the color legend for the donut chart categories
 class CalorieLegend extends StatelessWidget {
   final Map<String, int> breakdown;
+  final Color textColor;
 
   const CalorieLegend({
     super.key,
     required this.breakdown,
+    this.textColor = Colors.black87,
   });
 
   @override
@@ -231,26 +233,35 @@ class CalorieLegend extends StatelessWidget {
       runSpacing: 8,
       children: breakdown.entries.map((entry) {
         final color = _getCategoryColor(entry.key);
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: color.withValues(alpha: 0.35)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                ),
               ),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              '${entry.key}: ${entry.value} kcal',
-              style: const TextStyle(
-                fontSize: 11,
-                color: Colors.white70,
+              const SizedBox(width: 6),
+              Text(
+                '${entry.key}: ${entry.value} kcal',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: textColor,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       }).toList(),
     );

@@ -147,26 +147,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ],
             ),
           ),
-          _buildSettingsButton(context),
         ],
-      ),
-    );
-  }
-
-  /// Build settings button
-  Widget _buildSettingsButton(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-          width: 1,
-        ),
-      ),
-      child: IconButton(
-        icon: const Icon(Icons.settings_outlined, color: Colors.white),
-        onPressed: () => _showSettingsDialog(context),
       ),
     );
   }
@@ -588,20 +569,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     backgroundColor: forestGreen,
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Icon(Icons.restaurant_menu, size: 20),
                       const SizedBox(width: 8),
-                      Text("Recipes", style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600)),
+                      Text(
+                        "Recipes",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
             const SizedBox(width: 12),
+
             /// RIGHT: Voice Input
             Expanded(
               child: GestureDetector(
@@ -613,12 +603,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   height: 58,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: isListening ? [Colors.red.shade400, Colors.red.shade600] : [const Color(0xFFFFBF00), Colors.orange.shade600],
+                      colors: isListening
+                          ? [Colors.red.shade400, Colors.red.shade600]
+                          : [const Color(0xFFFFBF00), Colors.orange.shade600],
                     ),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: isListening
-                        ? [BoxShadow(color: Colors.red.withValues(alpha: 0.4), blurRadius: 20 * _pulseAnimation.value, spreadRadius: 5 * (_pulseAnimation.value - 1))]
-                        : [BoxShadow(color: Colors.orange.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))],
+                        ? [
+                            BoxShadow(
+                              color: Colors.red.withValues(alpha: 0.4),
+                              blurRadius: 20 * _pulseAnimation.value,
+                              spreadRadius: 5 * (_pulseAnimation.value - 1),
+                            ),
+                          ]
+                        : [
+                            BoxShadow(
+                              color: Colors.orange.withValues(alpha: 0.3),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                   ),
                   child: Center(
                     child: isListening
@@ -629,18 +633,40 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.mic, color: Colors.white, size: 20),
+                                const Icon(
+                                  Icons.mic,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: 8),
-                                Text("Listening...", style: GoogleFonts.poppins(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                                Text(
+                                  "Listening...",
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ],
                             ),
                           )
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.mic, color: Colors.white, size: 20),
+                              const Icon(
+                                Icons.mic,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
-                              Text("Hold to Speak", style: GoogleFonts.poppins(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                              Text(
+                                "Hold to Speak",
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ],
                           ),
                   ),
@@ -652,6 +678,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
   }
+
   Widget _buildListeningIndicator() {
     return Shimmer.fromColors(
       baseColor: Colors.white,
@@ -686,7 +713,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       if (!granted) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Microphone permission required'), backgroundColor: Colors.red),
+            const SnackBar(
+              content: Text('Microphone permission required'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
         return;
@@ -1084,50 +1114,104 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
   }
+
   /// Show success toast for voice input
-  void _showSuccessToast(BuildContext context, String text, VoiceIntent intent) {
+  void _showSuccessToast(
+    BuildContext context,
+    String text,
+    VoiceIntent intent,
+  ) {
     final message = text.getSuccessMessage(intent);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.green, duration: const Duration(seconds: 2), behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
   }
 
   /// Show confirmation bottom sheet for low confidence
-  void _showConfirmationBottomSheet(BuildContext context, String text, VoiceIntent intent) {
+  void _showConfirmationBottomSheet(
+    BuildContext context,
+    String text,
+    VoiceIntent intent,
+  ) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
         padding: EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.volume_up, size: 48, color: Colors.orange),
             SizedBox(height: 16),
-            Text("Did you say:", style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600])),
+            Text(
+              "Did you say:",
+              style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600]),
+            ),
             SizedBox(height: 8),
-            Text(text, style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F5741)), textAlign: TextAlign.center),
+            Text(
+              text,
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0F5741),
+              ),
+              textAlign: TextAlign.center,
+            ),
             SizedBox(height: 24),
-            Row(children: [
-              Expanded(child: OutlinedButton(
-                onPressed: () => Navigator.pop(context),
-                style: OutlinedButton.styleFrom(side: BorderSide(color: Colors.grey[300]!), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: EdgeInsets.symmetric(vertical: 14)),
-                child: Text("Edit", style: GoogleFonts.poppins(color: Colors.grey[700])),
-              )),
-              SizedBox(width: 12),
-              Expanded(child: ElevatedButton(
-                onPressed: () async {
-                  Navigator.pop(context);
-                  final provider = context.read<GroceryProvider>();
-                  await provider.processInput(text, isVoice: true);
-                  setState(() => _voicePreviewText = '');
-                  _showSuccessToast(context, text, intent);
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFFFBF00), foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: EdgeInsets.symmetric(vertical: 14)),
-                child: Text("Yes", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
-              )),
-            ]),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.grey[300]!),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: Text(
+                      "Edit",
+                      style: GoogleFonts.poppins(color: Colors.grey[700]),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      final provider = context.read<GroceryProvider>();
+                      await provider.processInput(text, isVoice: true);
+                      setState(() => _voicePreviewText = '');
+                      _showSuccessToast(context, text, intent);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFFFBF00),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: Text(
+                      "Yes",
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -1140,30 +1224,75 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
         padding: EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.restaurant_menu, size: 48, color: Colors.orange),
             SizedBox(height: 16),
-            Text("Go to recipe suggestions?", style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F5741))),
+            Text(
+              "Go to recipe suggestions?",
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0F5741),
+              ),
+            ),
             SizedBox(height: 8),
-            Text('Heard: "$text"', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600])),
+            Text(
+              'Heard: "$text"',
+              style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600]),
+            ),
             SizedBox(height: 24),
-            Row(children: [
-              Expanded(child: OutlinedButton(
-                onPressed: () { Navigator.pop(context); setState(() => _voicePreviewText = ''); },
-                style: OutlinedButton.styleFrom(side: BorderSide(color: Colors.grey[300]!), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: EdgeInsets.symmetric(vertical: 14)),
-                child: Text("Cancel", style: GoogleFonts.poppins(color: Colors.grey[700])),
-              )),
-              SizedBox(width: 12),
-              Expanded(child: ElevatedButton(
-                onPressed: () { Navigator.pop(context); setState(() => _voicePreviewText = ''); mainNavigationKey.currentState?.switchToMenuTab(); },
-                style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFFFBF00), foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: EdgeInsets.symmetric(vertical: 14)),
-                child: Text("Go", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
-              )),
-            ]),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      setState(() => _voicePreviewText = '');
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.grey[300]!),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: Text(
+                      "Cancel",
+                      style: GoogleFonts.poppins(color: Colors.grey[700]),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      setState(() => _voicePreviewText = '');
+                      mainNavigationKey.currentState?.switchToMenuTab();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFFFBF00),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: Text(
+                      "Go",
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -1184,10 +1313,18 @@ class _IngredientConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const forestGreen = Color(0xFF0F5741);
+    const primaryAmber = Color(0xFFFFBF00);
+    const cream = Color(0xFFF5EFDF);
+
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      backgroundColor: const Color(0xFF1A1A2E),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
       contentPadding: EdgeInsets.zero,
+      actionsAlignment: MainAxisAlignment.center,
+      actionsOverflowAlignment: OverflowBarAlignment.center,
+      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1195,9 +1332,9 @@ class _IngredientConfirmationDialog extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
             decoration: BoxDecoration(
-              color: Colors.green.shade50.withValues(alpha: 0.1),
+              color: cream,
               borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(20),
+                top: Radius.circular(24),
               ),
             ),
             child: Row(
@@ -1205,23 +1342,19 @@ class _IngredientConfirmationDialog extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.green.shade100.withValues(alpha: 0.2),
+                    color: primaryAmber.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.check,
-                    color: Colors.green.shade400,
-                    size: 24,
-                  ),
+                  child: const Icon(Icons.check, color: forestGreen, size: 24),
                 ),
                 const SizedBox(width: 16),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Ingredient Found!',
-                    style: TextStyle(
+                    style: GoogleFonts.poppins(
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      color: forestGreen,
                     ),
                   ),
                 ),
@@ -1242,8 +1375,8 @@ class _IngredientConfirmationDialog extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        width: 2,
+                        color: forestGreen.withValues(alpha: 0.12),
+                        width: 1.5,
                       ),
                     ),
                     child: ClipRRect(
@@ -1253,18 +1386,18 @@ class _IngredientConfirmationDialog extends StatelessWidget {
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            color: Colors.grey.shade800,
-                            child: Icon(
+                            color: cream,
+                            child: const Icon(
                               Icons.restaurant,
                               size: 48,
-                              color: Colors.grey.shade600,
+                              color: forestGreen,
                             ),
                           );
                         },
                         loadingBuilder: (context, child, loadingProgress) {
                           if (loadingProgress == null) return child;
                           return Container(
-                            color: Colors.grey.shade900,
+                            color: cream,
                             child: Center(
                               child: CircularProgressIndicator(
                                 value:
@@ -1272,7 +1405,7 @@ class _IngredientConfirmationDialog extends StatelessWidget {
                                     ? loadingProgress.cumulativeBytesLoaded /
                                           loadingProgress.expectedTotalBytes!
                                     : null,
-                                color: Colors.orange,
+                                color: forestGreen,
                               ),
                             ),
                           );
@@ -1285,13 +1418,13 @@ class _IngredientConfirmationDialog extends StatelessWidget {
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade800,
+                      color: cream,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.restaurant,
                       size: 48,
-                      color: Colors.grey.shade600,
+                      color: forestGreen,
                     ),
                   ),
 
@@ -1300,7 +1433,10 @@ class _IngredientConfirmationDialog extends StatelessWidget {
                 // Original input
                 Text(
                   'You entered: "$originalInput"',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: forestGreen.withValues(alpha: 0.55),
+                  ),
                   textAlign: TextAlign.center,
                 ),
 
@@ -1310,19 +1446,15 @@ class _IngredientConfirmationDialog extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.verified,
-                      size: 16,
-                      color: Colors.green.shade400,
-                    ),
+                    const Icon(Icons.verified, size: 16, color: forestGreen),
                     const SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         searchResult.name,
-                        style: const TextStyle(
+                        style: GoogleFonts.poppins(
                           fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          color: forestGreen,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -1339,25 +1471,21 @@ class _IngredientConfirmationDialog extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
+                    color: primaryAmber.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: Colors.blue.withValues(alpha: 0.3),
+                      color: primaryAmber.withValues(alpha: 0.45),
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.category,
-                        size: 14,
-                        color: Colors.blue.shade300,
-                      ),
+                      const Icon(Icons.category, size: 14, color: forestGreen),
                       const SizedBox(width: 6),
                       Text(
                         searchResult.aisle,
-                        style: TextStyle(
-                          color: Colors.blue.shade200,
+                        style: GoogleFonts.poppins(
+                          color: forestGreen,
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),
@@ -1377,8 +1505,9 @@ class _IngredientConfirmationDialog extends StatelessWidget {
           icon: const Icon(Icons.close, size: 18),
           label: const Text('Cancel'),
           style: TextButton.styleFrom(
-            foregroundColor: Colors.grey.shade400,
+            foregroundColor: forestGreen.withValues(alpha: 0.6),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            textStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
           ),
         ),
 
@@ -1388,12 +1517,13 @@ class _IngredientConfirmationDialog extends StatelessWidget {
           icon: const Icon(Icons.add_circle, size: 18),
           label: const Text('Add Ingredient'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
+            backgroundColor: forestGreen,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+            textStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
           ),
         ),
 
