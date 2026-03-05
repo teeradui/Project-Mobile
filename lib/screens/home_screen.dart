@@ -152,17 +152,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   /// Build settings button
   Widget _buildSettingsButton(BuildContext context) {
+    const forestGreen = Color(0xFF0F5741);
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-          width: 1,
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: IconButton(
-        icon: const Icon(Icons.settings_outlined, color: Colors.white),
+        icon: const Icon(Icons.settings_outlined, color: forestGreen, size: 22),
         onPressed: () => _showSettingsDialog(context),
       ),
     );
@@ -606,8 +611,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
       ),
     );
-  Widget _buildRecordButton(BuildContext context, GroceryProvider provider) {
-  }
+    Widget _buildRecordButton(BuildContext context, GroceryProvider provider) {}
     final isListening = provider.voiceService.isListening;
 
     return GestureDetector(
