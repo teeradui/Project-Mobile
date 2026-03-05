@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_project/screens/grocery_page.dart';
 import 'package:mobile_project/screens/recipe_suggestion_screen.dart';
 import 'package:mobile_project/services/spoonacular_service.dart';
@@ -47,6 +48,7 @@ class SmartKitchenApp extends StatelessWidget {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
+      fontFamily: GoogleFonts.poppins().fontFamily,
 
       // Color Scheme
       colorScheme: ColorScheme.light(
@@ -266,14 +268,14 @@ class _MainNavigationState extends State<MainNavigation> {
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.local_grocery_store_outlined),
-            selectedIcon: Icon(Icons.local_grocery_store),
-            label: 'Grocery',
+            icon: Icon(Icons.kitchen_rounded),
+            selectedIcon: Icon(Icons.kitchen_rounded),
+            label: 'All Ingredients',
           ),
           NavigationDestination(
             icon: Icon(Icons.restaurant_menu_outlined),
             selectedIcon: Icon(Icons.restaurant_menu),
-            label: 'Menu',
+            label: 'Suggestion Menu',
           ),
         ],
       ),
