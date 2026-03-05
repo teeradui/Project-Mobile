@@ -240,3 +240,35 @@ extension LocaleNameExtension on LocaleName {
     return '$name ($localeId)';
   }
 }
+
+/// Intent type detected from speech
+enum VoiceIntent {
+  ingredient,
+  recipeSuggestion,
+  unknown,
+}
+
+/// Extension to detect intent from recognized text
+extension VoiceIntentDetection on String {
+  VoiceIntent detectIntent() {
+    final lower = this.toLowerCase();
+    if (lower.contains('menu') || lower.contains('what should i eat') || lower.contains('recommend') || lower.contains('suggestion') || lower.contains('recipe') || lower.contains('cook')) {
+      return VoiceIntent.recipeSuggestion;
+    }
+    return VoiceIntent.ingredient;
+  }
+
+  String getConfirmationMessage(VoiceIntent intent) {
+    if (intent == VoiceIntent.recipeSuggestion) {
+      return "🔊 Heard '$this' - Go to recipe suggestions?";
+    }
+    return "🔊 Heard '$this' - Is this correct?";
+  }
+
+  String getSuccessMessage(VoiceIntent intent) {
+    if (intent == VoiceIntent.ingredient) {
+      return "✅ Added: $this";
+    }
+    return "✅ Opening recipes...";
+  }
+}

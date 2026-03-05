@@ -6,6 +6,7 @@ import '../models/grocery_item.dart';
 import '../providers/grocery_provider.dart';
 import '../services/spoonacular_service.dart';
 import '../main.dart' show mainNavigationKey;
+import '../services/voice_service.dart';
 
 // Export the IngredientSearchResult for use in this file
 export '../services/spoonacular_service.dart' show IngredientSearchResult;
@@ -26,6 +27,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   // Validation state
   bool _validateBeforeAdd = false;
+  // Voice preview state
+  String _voicePreviewText = '';
   bool _isValidating = false;
 
   @override
@@ -556,118 +559,99 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   /// Build "Calculate Recipes" button
+  /// Build dual buttons: Calculate Recipes + Voice Input
   Widget _buildCalculateButton(BuildContext context) {
     final provider = context.watch<GroceryProvider>();
-
+    final voiceService = provider.voiceService;
     const forestGreen = Color(0xFF0F5741);
+    final isListening = voiceService.isListening;
 
-    /// 👇 ถ้าไม่มี ingredient เลย ไม่ต้องแสดงปุ่ม
-    if (provider.totalItems == 0) {
-      return const SizedBox.shrink();
-    }
+    if (provider.totalItems == 0) return const SizedBox.shrink();
 
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
       child: SafeArea(
         top: false,
-        child: SizedBox(
-          height: 58,
-          child: ElevatedButton(
-            onPressed: () async {
-              // Fetch recipes first, then switch to Menu tab
-              await provider.fetchRecipesFromAPI();
-              // Use mainNavigationKey to switch to Menu tab (keeps nav bar visible)
-              mainNavigationKey.currentState?.switchToMenuTab();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: forestGreen,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.restaurant_menu, size: 22),
-                const SizedBox(width: 10),
-                Text(
-                  'Calculate Recipes',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+        child: Row(
+          children: [
+            /// LEFT: Calculate Recipes
+            Expanded(
+              child: SizedBox(
+                height: 58,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await provider.fetchRecipesFromAPI();
+                    mainNavigationKey.currentState?.switchToMenuTab();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: forestGreen,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.restaurant_menu, size: 20),
+                      const SizedBox(width: 8),
+                      Text("Recipes", style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600)),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
+            const SizedBox(width: 12),
+            /// RIGHT: Voice Input
+            Expanded(
+              child: GestureDetector(
+                onTapDown: (_) => _startListening(context),
+                onTapUp: (_) => _stopListening(context),
+                onTapCancel: () => _stopListening(context),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  height: 58,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isListening ? [Colors.red.shade400, Colors.red.shade600] : [const Color(0xFFFFBF00), Colors.orange.shade600],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: isListening
+                        ? [BoxShadow(color: Colors.red.withValues(alpha: 0.4), blurRadius: 20 * _pulseAnimation.value, spreadRadius: 5 * (_pulseAnimation.value - 1))]
+                        : [BoxShadow(color: Colors.orange.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))],
+                  ),
+                  child: Center(
+                    child: isListening
+                        ? Shimmer.fromColors(
+                            baseColor: Colors.white,
+                            highlightColor: Colors.white.withValues(alpha: 0.5),
+                            period: const Duration(milliseconds: 800),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.mic, color: Colors.white, size: 20),
+                                const SizedBox(width: 8),
+                                Text("Listening...", style: GoogleFonts.poppins(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.mic, color: Colors.white, size: 20),
+                              const SizedBox(width: 8),
+                              Text("Hold to Speak", style: GoogleFonts.poppins(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                            ],
+                          ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
-  Widget _buildRecordButton(BuildContext context, GroceryProvider provider) {
   }
-    final isListening = provider.voiceService.isListening;
-
-    return GestureDetector(
-      onTapDown: (_) => _startListening(context),
-      onTapUp: (_) => _stopListening(context),
-      onTapCancel: () => _stopListening(context),
-      child: AnimatedBuilder(
-        animation: _pulseAnimation,
-        builder: (context, child) {
-          return Container(
-            height: 60,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isListening
-                    ? [Colors.red.shade400, Colors.red.shade600]
-                    : [Colors.orange.shade400, Colors.orange.shade600],
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: isListening
-                  ? [
-                      BoxShadow(
-                        color: Colors.red.withValues(alpha: 0.4),
-                        blurRadius: 20 * _pulseAnimation.value,
-                        spreadRadius: 5 * (_pulseAnimation.value - 1),
-                      ),
-                    ]
-                  : [
-                      BoxShadow(
-                        color: Colors.orange.withValues(alpha: 0.3),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-            ),
-            child: Center(
-              child: isListening
-                  ? _buildListeningIndicator()
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.mic, color: Colors.white, size: 24),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Hold to Speak',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  /// Build listening indicator
   Widget _buildListeningIndicator() {
     return Shimmer.fromColors(
       baseColor: Colors.white,
@@ -692,6 +676,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   /// Start voice listening
+  /// Start voice listening
   void _startListening(BuildContext context) async {
     final provider = context.read<GroceryProvider>();
     final voiceService = provider.voiceService;
@@ -701,37 +686,49 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       if (!granted) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Microphone permission required'),
-              backgroundColor: Colors.red,
-            ),
+            const SnackBar(content: Text('Microphone permission required'), backgroundColor: Colors.red),
           );
         }
         return;
       }
     }
 
+    setState(() => _voicePreviewText = '');
     await voiceService.startListening(
-      onResult: (text) async {
-        if (_validateBeforeAdd) {
-          // Validate the voice input
-          _textController.text = text;
-          await _validateAndAddIngredient(context);
-        } else {
-          provider.processInput(text, isVoice: true);
-        }
+      onResult: (text) {
+        if (mounted) setState(() => _voicePreviewText = text);
       },
     );
-
     _pulseController.repeat();
   }
 
   /// Stop voice listening
   void _stopListening(BuildContext context) async {
     final provider = context.read<GroceryProvider>();
+    final voiceService = provider.voiceService;
     await provider.voiceService.stopListening();
     _pulseController.stop();
     _pulseController.reset();
+
+    final text = voiceService.recognizedWords.trim();
+    final confidence = voiceService.confidence;
+    if (text.isEmpty) {
+      if (mounted) setState(() => _voicePreviewText = '');
+      return;
+    }
+
+    final intent = text.detectIntent();
+    if (intent == VoiceIntent.recipeSuggestion) {
+      if (mounted) _showRecipeIntentBottomSheet(context, text);
+    } else if (confidence >= 0.8) {
+      if (mounted) {
+        setState(() => _voicePreviewText = '');
+        await provider.processInput(text, isVoice: true);
+        _showSuccessToast(context, text, intent);
+      }
+    } else {
+      if (mounted) _showConfirmationBottomSheet(context, text, intent);
+    }
   }
 
   /// Submit text input
@@ -1084,6 +1081,91 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         ],
+      ),
+    );
+  }
+  /// Show success toast for voice input
+  void _showSuccessToast(BuildContext context, String text, VoiceIntent intent) {
+    final message = text.getSuccessMessage(intent);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.green, duration: const Duration(seconds: 2), behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+    );
+  }
+
+  /// Show confirmation bottom sheet for low confidence
+  void _showConfirmationBottomSheet(BuildContext context, String text, VoiceIntent intent) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        padding: EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.volume_up, size: 48, color: Colors.orange),
+            SizedBox(height: 16),
+            Text("Did you say:", style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600])),
+            SizedBox(height: 8),
+            Text(text, style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F5741)), textAlign: TextAlign.center),
+            SizedBox(height: 24),
+            Row(children: [
+              Expanded(child: OutlinedButton(
+                onPressed: () => Navigator.pop(context),
+                style: OutlinedButton.styleFrom(side: BorderSide(color: Colors.grey[300]!), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: EdgeInsets.symmetric(vertical: 14)),
+                child: Text("Edit", style: GoogleFonts.poppins(color: Colors.grey[700])),
+              )),
+              SizedBox(width: 12),
+              Expanded(child: ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  final provider = context.read<GroceryProvider>();
+                  await provider.processInput(text, isVoice: true);
+                  setState(() => _voicePreviewText = '');
+                  _showSuccessToast(context, text, intent);
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFFFBF00), foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: EdgeInsets.symmetric(vertical: 14)),
+                child: Text("Yes", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+              )),
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Show recipe intent bottom sheet
+  void _showRecipeIntentBottomSheet(BuildContext context, String text) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        padding: EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.restaurant_menu, size: 48, color: Colors.orange),
+            SizedBox(height: 16),
+            Text("Go to recipe suggestions?", style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F5741))),
+            SizedBox(height: 8),
+            Text('Heard: "$text"', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600])),
+            SizedBox(height: 24),
+            Row(children: [
+              Expanded(child: OutlinedButton(
+                onPressed: () { Navigator.pop(context); setState(() => _voicePreviewText = ''); },
+                style: OutlinedButton.styleFrom(side: BorderSide(color: Colors.grey[300]!), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: EdgeInsets.symmetric(vertical: 14)),
+                child: Text("Cancel", style: GoogleFonts.poppins(color: Colors.grey[700])),
+              )),
+              SizedBox(width: 12),
+              Expanded(child: ElevatedButton(
+                onPressed: () { Navigator.pop(context); setState(() => _voicePreviewText = ''); mainNavigationKey.currentState?.switchToMenuTab(); },
+                style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFFFBF00), foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: EdgeInsets.symmetric(vertical: 14)),
+                child: Text("Go", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+              )),
+            ]),
+          ],
+        ),
       ),
     );
   }
