@@ -730,7 +730,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() => _voicePreviewText = '');
     await voiceService.startListening(
       onResult: (text) {
-        if (mounted) setState(() => _voicePreviewText = text);
+        if (mounted) {
+          setState(() {
+            _voicePreviewText = text;
+            _textController.text = text; // Update TextField in real-time
+          });
+        }
       },
     );
     _pulseController.repeat();
@@ -756,9 +761,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       if (mounted) _showRecipeIntentBottomSheet(context, text);
     } else if (confidence >= 0.8) {
       if (mounted) {
-        setState(() => _voicePreviewText = '');
-        await provider.processInput(text, isVoice: true);
-        _showSuccessToast(context, text, intent);
+        setState(() {
+          _voicePreviewText = '';
+          _textController.text = text; // Put voice result in TextField for user to submit
+        });
       }
     } else {
       if (mounted) _showConfirmationBottomSheet(context, text, intent);
