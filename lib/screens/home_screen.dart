@@ -67,7 +67,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     return Column(
                       children: [
                         _buildIngredientCountCard(context, provider),
-                        Expanded(child: _buildIngredientList(context, provider)),
+                        Expanded(
+                          child: _buildIngredientList(context, provider),
+                        ),
                       ],
                     );
                   },
@@ -84,72 +86,69 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   /// Build gradient background decoration
   BoxDecoration _buildBackgroundDecoration() {
-  return const BoxDecoration(
-    gradient: LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        Color(0xFFF5EFDF), // cream
-        Color(0xFFEDE4CF),
-      ],
-    ),
-  );
-}
+    return const BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color(0xFFF5EFDF), // cream
+          Color(0xFFEDE4CF),
+        ],
+      ),
+    );
+  }
 
   /// Build app header
   Widget _buildHeader(BuildContext context) {
-  const forestGreen = Color(0xFF0F5741);
-  const primaryAmber = Color(0xFFFFBF00);
+    const forestGreen = Color(0xFF0F5741);
+    const primaryAmber = Color(0xFFFFBF00);
 
-  return Padding(
-    padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-    child: Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                primaryAmber,
-                primaryAmber.withOpacity(0.8),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [primaryAmber, primaryAmber.withOpacity(0.8)],
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Icon(
+              Icons.kitchen_rounded,
+              color: Colors.white,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Smart Kitchen',
+                  style: GoogleFonts.poppins(
+                    color: forestGreen,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  'Voice Recipe Assistant',
+                  style: GoogleFonts.poppins(
+                    color: forestGreen.withOpacity(0.6),
+                    fontSize: 13,
+                  ),
+                ),
               ],
             ),
-            borderRadius: BorderRadius.circular(20),
           ),
-          child: const Icon(
-            Icons.kitchen_rounded,
-            color: Colors.white,
-            size: 28,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Smart Kitchen',
-                style: GoogleFonts.poppins(
-                  color: forestGreen,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Text(
-                'Voice Recipe Assistant',
-                style: GoogleFonts.poppins(
-                  color: forestGreen.withOpacity(0.6),
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-        _buildSettingsButton(context),
-      ],
-    ),
-  );
-}
+          _buildSettingsButton(context),
+        ],
+      ),
+    );
+  }
 
   /// Build settings button
   Widget _buildSettingsButton(BuildContext context) {
@@ -171,64 +170,66 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   /// Build ingredient count card
   Widget _buildIngredientCountCard(
-    BuildContext context, GroceryProvider provider) {
-  const forestGreen = Color(0xFF0F5741);
-  const primaryAmber = Color(0xFFFFBF00);
+    BuildContext context,
+    GroceryProvider provider,
+  ) {
+    const forestGreen = Color(0xFF0F5741);
+    const primaryAmber = Color(0xFFFFBF00);
 
-  return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-    padding: const EdgeInsets.all(20),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(24),
-      boxShadow: [
-        BoxShadow(
-          color: forestGreen.withOpacity(0.08),
-          blurRadius: 20,
-          offset: const Offset(0, 10),
-        ),
-      ],
-    ),
-    child: Row(
-      children: [
-        Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            color: primaryAmber.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(16),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: forestGreen.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
-          child: const Icon(
-            Icons.shopping_basket_outlined,
-            color: forestGreen,
-            size: 30,
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: primaryAmber.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(
+              Icons.shopping_basket_outlined,
+              color: forestGreen,
+              size: 30,
+            ),
           ),
-        ),
-        const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Your Ingredients',
-              style: GoogleFonts.poppins(
-                color: forestGreen.withOpacity(0.7),
-                fontSize: 14,
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Your Ingredients',
+                style: GoogleFonts.poppins(
+                  color: forestGreen.withOpacity(0.7),
+                  fontSize: 14,
+                ),
               ),
-            ),
-            Text(
-              '${provider.totalItems}',
-              style: GoogleFonts.poppins(
-                color: forestGreen,
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
+              Text(
+                '${provider.totalItems}',
+                style: GoogleFonts.poppins(
+                  color: forestGreen,
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   /// Build ingredient list
   Widget _buildIngredientList(BuildContext context, GroceryProvider provider) {
@@ -243,379 +244,375 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: ListView.builder(
         padding: const EdgeInsets.only(bottom: 16),
         itemCount: items.length,
-        itemBuilder: (context, index) => _buildIngredientCard(context, items[index], provider),
+        itemBuilder: (context, index) =>
+            _buildIngredientCard(context, items[index], provider),
       ),
     );
   }
 
   /// Build empty state
   Widget _buildEmptyState(BuildContext context) {
-  const forestGreen = Color(0xFF0F5741);
+    const forestGreen = Color(0xFF0F5741);
 
-  return Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.mic_none,
-          size: 70,
-          color: forestGreen.withOpacity(0.3),
-        ),
-        const SizedBox(height: 20),
-        Text(
-          'No ingredients yet',
-          style: GoogleFonts.poppins(
-            color: forestGreen,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'Tap the microphone to start adding',
-          style: GoogleFonts.poppins(
-            color: forestGreen.withOpacity(0.5),
-            fontSize: 13,
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-  /// Build ingredient card
-  Widget _buildIngredientCard(
-  BuildContext context,
-  GroceryItem item,
-  GroceryProvider provider,
-) {
-  final category = GroceryCategory.getCategoryForItem(item.name);
-  const forestGreen = Color(0xFF0F5741);
-
-  return Container(
-    margin: const EdgeInsets.only(bottom: 14),
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
-      boxShadow: [
-        BoxShadow(
-          color: forestGreen.withOpacity(0.06),
-          blurRadius: 18,
-          offset: const Offset(0, 8),
-        )
-      ],
-    ),
-    child: Row(
-      children: [
-        Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: category.color.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Center(
-            child: Text(category.emoji, style: const TextStyle(fontSize: 22)),
-          ),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                item.name,
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
-                  color: forestGreen,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                item.formattedAmount,
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: forestGreen.withOpacity(0.5),
-                ),
-              ),
-            ],
-          ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.more_vert),
-          color: forestGreen.withOpacity(0.5),
-          onPressed: () =>
-              _showItemOptions(context, item, provider),
-        ),
-      ],
-    ),
-  );
-}
-
-  /// Build input section
-  Widget _buildInputSection(BuildContext context) {
-  final provider = context.watch<GroceryProvider>();
-  final isListening = provider.voiceService.isListening;
-
-  const forestGreen = Color(0xFF0F5741);
-  const primaryAmber = Color(0xFFFFBF00);
-  const softCream = Color(0xFFF6F1E5);
-
-  return Container(
-    padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(36),
-        topRight: Radius.circular(36),
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.08),
-          blurRadius: 30,
-          offset: const Offset(0, -10),
-        ),
-      ],
-    ),
-    child: SafeArea(
-      top: false,
+    return Center(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-
-          /// ===== ERROR MESSAGE =====
-          if (provider.errorMessage.isNotEmpty)
-            Container(
-              margin: const EdgeInsets.only(bottom: 14),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.red.shade200),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.error_outline,
-                      color: Colors.red.shade400, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      provider.errorMessage,
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.red.shade600,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => provider.clearError(),
-                    child: Icon(Icons.close,
-                        size: 16, color: Colors.red.shade400),
-                  )
-                ],
-              ),
+          Icon(Icons.mic_none, size: 70, color: forestGreen.withOpacity(0.3)),
+          const SizedBox(height: 20),
+          Text(
+            'No ingredients yet',
+            style: GoogleFonts.poppins(
+              color: forestGreen,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
             ),
-
-          /// ===== TEXT FIELD WITH BUILT-IN MIC =====
-          /// ===== TEXT FIELD WITH MIC ON THE LEFT =====
-Container(
-  decoration: BoxDecoration(
-    color: softCream,
-    borderRadius: BorderRadius.circular(30),
-    border: Border.all(
-      color: isListening
-          ? Colors.red
-          : primaryAmber.withOpacity(0.4),
-      width: 1.5,
-    ),
-  ),
-  child: TextField(
-    controller: _textController,
-    enabled: !_isValidating,
-    style: GoogleFonts.poppins(
-      color: forestGreen,
-      fontSize: 15,
-      fontWeight: FontWeight.w500,
-    ),
-    decoration: InputDecoration(
-      hintText: _validateBeforeAdd
-          ? 'Type ingredient to validate & add...'
-          : 'Type or hold mic to speak...',
-      hintStyle: GoogleFonts.poppins(
-        color: forestGreen.withOpacity(0.4),
-        fontSize: 14,
-      ),
-      border: InputBorder.none,
-      contentPadding:
-          const EdgeInsets.symmetric(vertical: 18),
-
-      /// 🎤 MIC ON LEFT
-      prefixIcon: GestureDetector(
-        onTapDown: (_) => _startListening(context),
-        onTapUp: (_) => _stopListening(context),
-        onTapCancel: () => _stopListening(context),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isListening
-                ? Colors.red
-                : forestGreen,
-            boxShadow: isListening
-                ? [
-                    BoxShadow(
-                      color: Colors.red.withOpacity(0.6),
-                      blurRadius: 12,
-                      spreadRadius: 1,
-                    )
-                  ]
-                : [],
           ),
-          child: Icon(
-            isListening ? Icons.mic : Icons.mic_none,
-            color: Colors.white,
-            size: 20,
-          ),
-        ),
-      ),
-
-      /// ➤ SEND BUTTON RIGHT
-      suffixIcon: !_isValidating
-          ? IconButton(
-              icon: const Icon(Icons.send),
-              color: primaryAmber,
-              onPressed: () => _submitText(context),
-            )
-          : null,
-    ),
-    onSubmitted: (_) => _submitText(context),
-  ),
-),
-
-          const SizedBox(height: 14),
-
-          /// ===== VALIDATION TOGGLE (CLEANER VERSION) =====
-          Row(
-            children: [
-              Icon(
-                _validateBeforeAdd
-                    ? Icons.verified_rounded
-                    : Icons.flash_on_rounded,
-                size: 18,
-                color: _validateBeforeAdd
-                    ? primaryAmber
-                    : forestGreen,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  _validateBeforeAdd
-                      ? 'Validation Mode'
-                      : 'Quick Add Mode',
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: forestGreen,
-                  ),
-                ),
-              ),
-              Switch(
-  value: _validateBeforeAdd,
-  onChanged: !_isValidating
-      ? (value) {
-          setState(() {
-            _validateBeforeAdd = value;
-          });
-        }
-      : null,
-
-  thumbColor: MaterialStateProperty.resolveWith((states) {
-    if (states.contains(MaterialState.selected)) {
-      return primaryAmber; // ตอนเปิด = เหลือง
-    }
-    return forestGreen; // ตอนปิด = เขียว
-  }),
-
-  trackColor: MaterialStateProperty.resolveWith((states) {
-    if (states.contains(MaterialState.selected)) {
-      return primaryAmber.withOpacity(0.35);
-    }
-    return forestGreen.withOpacity(0.35);
-  }),
-
-  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-),
-            ],
+          const SizedBox(height: 6),
+          Text(
+            'Tap the microphone to start adding',
+            style: GoogleFonts.poppins(
+              color: forestGreen.withOpacity(0.5),
+              fontSize: 13,
+            ),
           ),
         ],
       ),
-    ),
-  );
-}
+    );
+  }
+
+  /// Build ingredient card
+  Widget _buildIngredientCard(
+    BuildContext context,
+    GroceryItem item,
+    GroceryProvider provider,
+  ) {
+    final category = GroceryCategory.getCategoryForItem(item.name);
+    const forestGreen = Color(0xFF0F5741);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: forestGreen.withOpacity(0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: category.color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Center(
+              child: Text(category.emoji, style: const TextStyle(fontSize: 22)),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.name,
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: forestGreen,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  item.formattedAmount,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: forestGreen.withOpacity(0.5),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.more_vert),
+            color: forestGreen.withOpacity(0.5),
+            onPressed: () => _showItemOptions(context, item, provider),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build input section
+  Widget _buildInputSection(BuildContext context) {
+    final provider = context.watch<GroceryProvider>();
+    final isListening = provider.voiceService.isListening;
+
+    const forestGreen = Color(0xFF0F5741);
+    const primaryAmber = Color(0xFFFFBF00);
+    const softCream = Color(0xFFF6F1E5);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(36),
+          topRight: Radius.circular(36),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 30,
+            offset: const Offset(0, -10),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            /// ===== ERROR MESSAGE =====
+            if (provider.errorMessage.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      color: Colors.red.shade400,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        provider.errorMessage,
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: Colors.red.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => provider.clearError(),
+                      child: Icon(
+                        Icons.close,
+                        size: 16,
+                        color: Colors.red.shade400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            /// ===== TEXT FIELD WITH BUILT-IN MIC =====
+            /// ===== TEXT FIELD WITH MIC ON THE LEFT =====
+            Container(
+              decoration: BoxDecoration(
+                color: softCream,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
+                  color: isListening
+                      ? Colors.red
+                      : primaryAmber.withOpacity(0.4),
+                  width: 1.5,
+                ),
+              ),
+              child: TextField(
+                controller: _textController,
+                enabled: !_isValidating,
+                style: GoogleFonts.poppins(
+                  color: forestGreen,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+                decoration: InputDecoration(
+                  hintText: _validateBeforeAdd
+                      ? 'Type ingredient to validate & add...'
+                      : 'Type or hold mic to speak...',
+                  hintStyle: GoogleFonts.poppins(
+                    color: forestGreen.withOpacity(0.4),
+                    fontSize: 14,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 18),
+
+                  /// 🎤 MIC ON LEFT
+                  prefixIcon: GestureDetector(
+                    onTapDown: (_) => _startListening(context),
+                    onTapUp: (_) => _stopListening(context),
+                    onTapCancel: () => _stopListening(context),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      margin: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isListening ? Colors.red : forestGreen,
+                        boxShadow: isListening
+                            ? [
+                                BoxShadow(
+                                  color: Colors.red.withOpacity(0.6),
+                                  blurRadius: 12,
+                                  spreadRadius: 1,
+                                ),
+                              ]
+                            : [],
+                      ),
+                      child: Icon(
+                        isListening ? Icons.mic : Icons.mic_none,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+
+                  /// ➤ SEND BUTTON RIGHT
+                  suffixIcon: !_isValidating
+                      ? IconButton(
+                          icon: const Icon(Icons.send),
+                          color: primaryAmber,
+                          onPressed: () => _submitText(context),
+                        )
+                      : null,
+                ),
+                onSubmitted: (_) => _submitText(context),
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            /// ===== VALIDATION TOGGLE (CLEANER VERSION) =====
+            Row(
+              children: [
+                Icon(
+                  _validateBeforeAdd
+                      ? Icons.verified_rounded
+                      : Icons.flash_on_rounded,
+                  size: 18,
+                  color: _validateBeforeAdd ? primaryAmber : forestGreen,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _validateBeforeAdd ? 'Validation Mode' : 'Quick Add Mode',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: forestGreen,
+                    ),
+                  ),
+                ),
+                Switch(
+                  value: _validateBeforeAdd,
+                  onChanged: !_isValidating
+                      ? (value) {
+                          setState(() {
+                            _validateBeforeAdd = value;
+                          });
+                        }
+                      : null,
+
+                  thumbColor: MaterialStateProperty.resolveWith((states) {
+                    if (states.contains(MaterialState.selected)) {
+                      return primaryAmber; // ตอนเปิด = เหลือง
+                    }
+                    return forestGreen; // ตอนปิด = เขียว
+                  }),
+
+                  trackColor: MaterialStateProperty.resolveWith((states) {
+                    if (states.contains(MaterialState.selected)) {
+                      return primaryAmber.withOpacity(0.35);
+                    }
+                    return forestGreen.withOpacity(0.35);
+                  }),
+
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   /// Build "Calculate Recipes" button
   Widget _buildCalculateButton(BuildContext context) {
-  final provider = context.watch<GroceryProvider>();
+    final provider = context.watch<GroceryProvider>();
 
-  const forestGreen = Color(0xFF0F5741);
+    const forestGreen = Color(0xFF0F5741);
 
-  /// 👇 ถ้าไม่มี ingredient เลย ไม่ต้องแสดงปุ่ม
-  if (provider.totalItems == 0) {
-    return const SizedBox.shrink();
-  }
+    /// 👇 ถ้าไม่มี ingredient เลย ไม่ต้องแสดงปุ่ม
+    if (provider.totalItems == 0) {
+      return const SizedBox.shrink();
+    }
 
-  return Container(
-    color: Colors.white,
-    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-    child: SafeArea(
-      top: false,
-      child: SizedBox(
-        height: 58,
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => RecipeSuggestionScreen(
-                  ingredients: provider.unpurchasedItems
-                      .map((e) => e.name)
-                      .toList(),
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 58,
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RecipeSuggestionScreen(
+                    ingredients: provider.unpurchasedItems
+                        .map((e) => e.name)
+                        .toList(),
+                  ),
                 ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: forestGreen,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: forestGreen,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
             ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.restaurant_menu, size: 22),
-              const SizedBox(width: 10),
-              Text(
-                'Calculate Recipes',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.restaurant_menu, size: 22),
+                const SizedBox(width: 10),
+                Text(
+                  'Calculate Recipes',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   /// Start voice listening
   void _startListening(BuildContext context) async {
@@ -742,9 +739,7 @@ Container(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         backgroundColor: const Color(0xFF1A1A2E),
         title: Row(
           children: [
@@ -774,10 +769,7 @@ Container(
             Text(
               'This ingredient was not found in the Spoonacular database. '
               'Please check the spelling or try a different name.',
-              style: TextStyle(
-                color: Colors.grey.shade400,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
             ),
           ],
         ),
@@ -792,7 +784,11 @@ Container(
   }
 
   /// Show item options
-  void _showItemOptions(BuildContext context, GroceryItem item, GroceryProvider provider) {
+  void _showItemOptions(
+    BuildContext context,
+    GroceryItem item,
+    GroceryProvider provider,
+  ) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -852,9 +848,15 @@ Container(
   }
 
   /// Show edit dialog
-  void _showEditDialog(BuildContext context, GroceryItem item, GroceryProvider provider) {
+  void _showEditDialog(
+    BuildContext context,
+    GroceryItem item,
+    GroceryProvider provider,
+  ) {
     final nameController = TextEditingController(text: item.name);
-    final amountController = TextEditingController(text: item.amount.toString());
+    final amountController = TextEditingController(
+      text: item.amount.toString(),
+    );
     final unitController = TextEditingController(text: item.unit);
 
     showDialog(
@@ -874,11 +876,19 @@ Container(
             Row(
               children: [
                 Expanded(
-                  child: _buildEditField(amountController, 'Qty', Icons.format_list_numbered),
+                  child: _buildEditField(
+                    amountController,
+                    'Qty',
+                    Icons.format_list_numbered,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _buildEditField(unitController, 'Unit', Icons.straighten),
+                  child: _buildEditField(
+                    unitController,
+                    'Unit',
+                    Icons.straighten,
+                  ),
                 ),
               ],
             ),
@@ -894,11 +904,13 @@ Container(
           ),
           TextButton(
             onPressed: () {
-              provider.updateItem(item.copyWith(
-                name: nameController.text,
-                amount: double.tryParse(amountController.text) ?? item.amount,
-                unit: unitController.text,
-              ));
+              provider.updateItem(
+                item.copyWith(
+                  name: nameController.text,
+                  amount: double.tryParse(amountController.text) ?? item.amount,
+                  unit: unitController.text,
+                ),
+              );
               Navigator.pop(context);
             },
             child: Text(
@@ -912,17 +924,21 @@ Container(
   }
 
   /// Build edit field
-  Widget _buildEditField(TextEditingController controller, String label, IconData icon) {
+  Widget _buildEditField(
+    TextEditingController controller,
+    String label,
+    IconData icon,
+  ) {
     return TextField(
       controller: controller,
       style: GoogleFonts.poppins(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.poppins(color: Colors.white.withValues(alpha: 0.5)),
-        prefixIcon: Icon(icon, color: Colors.white.withValues(alpha: 0.5)),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+        labelStyle: GoogleFonts.poppins(
+          color: Colors.white.withValues(alpha: 0.5),
         ),
+        prefixIcon: Icon(icon, color: Colors.white.withValues(alpha: 0.5)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
@@ -954,13 +970,15 @@ Container(
           style: GoogleFonts.poppins(color: Colors.white),
           decoration: InputDecoration(
             labelText: 'Gemini API Key (optional)',
-            labelStyle: GoogleFonts.poppins(color: Colors.white.withValues(alpha: 0.5)),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+            labelStyle: GoogleFonts.poppins(
+              color: Colors.white.withValues(alpha: 0.5),
             ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -1008,9 +1026,7 @@ class _IngredientConfirmationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       backgroundColor: const Color(0xFF1A1A2E),
       contentPadding: EdgeInsets.zero,
       content: Column(
@@ -1092,9 +1108,10 @@ class _IngredientConfirmationDialog extends StatelessWidget {
                             color: Colors.grey.shade900,
                             child: Center(
                               child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null
+                                value:
+                                    loadingProgress.expectedTotalBytes != null
                                     ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
+                                          loadingProgress.expectedTotalBytes!
                                     : null,
                                 color: Colors.orange,
                               ),
@@ -1124,10 +1141,7 @@ class _IngredientConfirmationDialog extends StatelessWidget {
                 // Original input
                 Text(
                   'You entered: "$originalInput"',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade400,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
                   textAlign: TextAlign.center,
                 ),
 
@@ -1205,10 +1219,7 @@ class _IngredientConfirmationDialog extends StatelessWidget {
           label: const Text('Cancel'),
           style: TextButton.styleFrom(
             foregroundColor: Colors.grey.shade400,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
 
@@ -1220,10 +1231,7 @@ class _IngredientConfirmationDialog extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
             foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: 12,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -1254,7 +1262,11 @@ Future<void> showAddIngredientManuallyDialog(BuildContext context) async {
           backgroundColor: const Color(0xFF1A1A2E),
           title: Row(
             children: [
-              const Icon(Icons.add_circle_outline, color: Colors.green, size: 28),
+              const Icon(
+                Icons.add_circle_outline,
+                color: Colors.green,
+                size: 28,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -1298,14 +1310,19 @@ Future<void> showAddIngredientManuallyDialog(BuildContext context) async {
                   controller: ingredientController,
                   decoration: InputDecoration(
                     hintText: 'e.g., ไก่, chicken, ข้าว',
-                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+                    hintStyle: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.3),
+                    ),
                     filled: true,
                     fillColor: Colors.white.withValues(alpha: 0.05),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
-                    prefixIcon: const Icon(Icons.restaurant, color: Colors.orange),
+                    prefixIcon: const Icon(
+                      Icons.restaurant,
+                      color: Colors.orange,
+                    ),
                   ),
                   style: const TextStyle(color: Colors.white),
                 ),
@@ -1364,11 +1381,17 @@ Future<void> showAddIngredientManuallyDialog(BuildContext context) async {
                         color: Colors.white,
                         fontSize: 14,
                       ),
-                      icon: const Icon(Icons.arrow_drop_down, color: Colors.orange),
+                      icon: const Icon(
+                        Icons.arrow_drop_down,
+                        color: Colors.orange,
+                      ),
                       items: [
                         DropdownMenuItem(
                           value: 'pcs',
-                          child: Text('Pieces / ชิ้น', style: GoogleFonts.poppins()),
+                          child: Text(
+                            'Pieces / ชิ้น',
+                            style: GoogleFonts.poppins(),
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'ตัว',
@@ -1376,7 +1399,10 @@ Future<void> showAddIngredientManuallyDialog(BuildContext context) async {
                         ),
                         DropdownMenuItem(
                           value: 'g',
-                          child: Text('Grams (g)', style: GoogleFonts.poppins()),
+                          child: Text(
+                            'Grams (g)',
+                            style: GoogleFonts.poppins(),
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'กรัม',
@@ -1384,7 +1410,10 @@ Future<void> showAddIngredientManuallyDialog(BuildContext context) async {
                         ),
                         DropdownMenuItem(
                           value: 'kg',
-                          child: Text('Kilograms (kg)', style: GoogleFonts.poppins()),
+                          child: Text(
+                            'Kilograms (kg)',
+                            style: GoogleFonts.poppins(),
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'กิโล',
@@ -1392,23 +1421,38 @@ Future<void> showAddIngredientManuallyDialog(BuildContext context) async {
                         ),
                         DropdownMenuItem(
                           value: 'cup',
-                          child: Text('Cup / ถ้วย', style: GoogleFonts.poppins()),
+                          child: Text(
+                            'Cup / ถ้วย',
+                            style: GoogleFonts.poppins(),
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'tbsp',
-                          child: Text('Tablespoon / ช้อนโตเที่ยม', style: GoogleFonts.poppins()),
+                          child: Text(
+                            'Tablespoon / ช้อนโตเที่ยม',
+                            style: GoogleFonts.poppins(),
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'tsp',
-                          child: Text('Teaspoon / ช้อนชา', style: GoogleFonts.poppins()),
+                          child: Text(
+                            'Teaspoon / ช้อนชา',
+                            style: GoogleFonts.poppins(),
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'ml',
-                          child: Text('Milliliter (ml) / มิลลิลิตร', style: GoogleFonts.poppins()),
+                          child: Text(
+                            'Milliliter (ml) / มิลลิลิตร',
+                            style: GoogleFonts.poppins(),
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'liter',
-                          child: Text('Liter / ลิตร', style: GoogleFonts.poppins()),
+                          child: Text(
+                            'Liter / ลิตร',
+                            style: GoogleFonts.poppins(),
+                          ),
                         ),
                       ],
                       onChanged: (value) {
@@ -1506,9 +1550,7 @@ Future<void> showAddIngredientManuallyDialog(BuildContext context) async {
               },
               icon: const Icon(Icons.add_circle, size: 18),
               label: const Text('Add / เพิ่ม'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
             ),
           ],
         );
@@ -1528,20 +1570,18 @@ Widget _buildQuickUnitButton(
   return OutlinedButton(
     onPressed: () => onTap(unitValue),
     style: OutlinedButton.styleFrom(
-      backgroundColor: isSelected ? Colors.orange.withValues(alpha: 0.2) : Colors.transparent,
-      foregroundColor: isSelected ? Colors.orange : Colors.white.withValues(alpha: 0.6),
+      backgroundColor: isSelected
+          ? Colors.orange.withValues(alpha: 0.2)
+          : Colors.transparent,
+      foregroundColor: isSelected
+          ? Colors.orange
+          : Colors.white.withValues(alpha: 0.6),
       side: BorderSide(
         color: isSelected ? Colors.orange : Colors.white.withValues(alpha: 0.3),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     ),
-    child: Text(
-      label,
-      style: GoogleFonts.poppins(fontSize: 11),
-    ),
+    child: Text(label, style: GoogleFonts.poppins(fontSize: 11)),
   );
 }
-

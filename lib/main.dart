@@ -41,8 +41,8 @@ class SmartKitchenApp extends StatelessWidget {
 
   /// Build app theme with custom colors
   ThemeData _buildTheme() {
-    const Color primaryAmber    = Color(0xFFFFBF00);
-    const Color forestGreen     = Color(0xFF0F5741);
+    const Color primaryAmber = Color(0xFFFFBF00);
+    const Color forestGreen = Color(0xFF0F5741);
     const Color creamBackground = Color(0xFFF5EFDF);
 
     return ThemeData(
@@ -202,20 +202,20 @@ class SmartKitchenApp extends StatelessWidget {
       ),
 
       switchTheme: SwitchThemeData(
-  thumbColor: WidgetStateProperty.resolveWith((states) {
-    if (states.contains(WidgetState.selected)) {
-      return primaryAmber; // ON = เหลือง
-    }
-    return forestGreen; // OFF = เขียว
-  }),
-  trackColor: WidgetStateProperty.resolveWith((states) {
-    if (states.contains(WidgetState.selected)) {
-      return primaryAmber.withValues(alpha: 0.4);
-    }
-    return forestGreen.withValues(alpha: 0.4);
-  }),
-  trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
-),
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return primaryAmber; // ON = เหลือง
+          }
+          return forestGreen; // OFF = เขียว
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return primaryAmber.withValues(alpha: 0.4);
+          }
+          return forestGreen.withValues(alpha: 0.4);
+        }),
+        trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+      ),
 
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: forestGreen,
@@ -228,9 +228,16 @@ class SmartKitchenApp extends StatelessWidget {
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const TextStyle(color: primaryAmber, fontWeight: FontWeight.w600,fontSize: 12);
+            return const TextStyle(
+              color: primaryAmber,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            );
           }
-          return TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12);
+          return TextStyle(
+            color: Colors.white.withValues(alpha: 0.6),
+            fontSize: 12,
+          );
         }),
       ),
     );
@@ -245,17 +252,16 @@ class MainNavigation extends StatefulWidget {
 }
 
 class RecipeNavWrapper extends StatelessWidget {
-    const RecipeNavWrapper({super.key});
+  const RecipeNavWrapper({super.key});
 
-    @override
-    Widget build(BuildContext context) {
-      final provider = context.watch<GroceryProvider>();
-      return RecipeSuggestionScreen(
-        ingredients: provider.unpurchasedItems.map((item) => item.name).toList(),
-      );
-    }
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<GroceryProvider>();
+    return RecipeSuggestionScreen(
+      ingredients: provider.unpurchasedItems.map((item) => item.name).toList(),
+    );
   }
-
+}
 
 class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
@@ -265,7 +271,7 @@ class _MainNavigationState extends State<MainNavigation> {
     const GroceryPage(),
     const RecipeNavWrapper(),
   ];
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

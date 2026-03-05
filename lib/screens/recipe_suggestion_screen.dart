@@ -47,11 +47,7 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFF5EFDF),
-              Color(0xFFEDE4CF),
-              Color(0xFFE3D7BB),
-            ],
+            colors: [Color(0xFFF5EFDF), Color(0xFFEDE4CF), Color(0xFFE3D7BB)],
           ),
         ),
         child: SafeArea(
@@ -104,7 +100,11 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20),
+          const Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.orange,
+            size: 20,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -139,11 +139,7 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
       itemBuilder: (context, index) {
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
-          child: _buildRecipeCard(
-            context,
-            recipes[index],
-            widget.ingredients,
-          ),
+          child: _buildRecipeCard(context, recipes[index], widget.ingredients),
         );
       },
     );
@@ -190,7 +186,10 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
             ),
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen())),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeScreen()),
+              ),
             ),
           ),
           const SizedBox(width: 16),
@@ -255,19 +254,21 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
             spacing: 8,
             runSpacing: 8,
             children: widget.ingredients
-                .map((ingredient) => Chip(
-                      label: Text(
-                        ingredient,
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
+                .map(
+                  (ingredient) => Chip(
+                    label: Text(
+                      ingredient,
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 12,
                       ),
-                      backgroundColor: Colors.white.withValues(alpha: 0.15),
-                      side: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.3),
-                      ),
-                    ))
+                    ),
+                    backgroundColor: Colors.white.withValues(alpha: 0.15),
+                    side: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.3),
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ],
@@ -464,11 +465,17 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
                             runSpacing: 8,
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
                                 decoration: BoxDecoration(
                                   color: matchColor.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: matchColor, width: 1),
+                                  border: Border.all(
+                                    color: matchColor,
+                                    width: 1,
+                                  ),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -486,7 +493,9 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
                                       Text(
                                         '(${missingIngredients.length} ขาด)',
                                         style: GoogleFonts.poppins(
-                                          color: matchColor.withValues(alpha: 0.7),
+                                          color: matchColor.withValues(
+                                            alpha: 0.7,
+                                          ),
                                           fontSize: 9,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -497,11 +506,17 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
                               ),
                               if (calories != null)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.blue.withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: Colors.blue, width: 1),
+                                    border: Border.all(
+                                      color: Colors.blue,
+                                      width: 1,
+                                    ),
                                   ),
                                   child: Text(
                                     '$calories kcal',
@@ -514,12 +529,17 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
                                 ),
                               if (isSpoonacular)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.purple.withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
-                                      color: Colors.purple.withValues(alpha: 0.4),
+                                      color: Colors.purple.withValues(
+                                        alpha: 0.4,
+                                      ),
                                     ),
                                   ),
                                   child: Row(
@@ -553,11 +573,7 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
                 // Recipe metadata
                 Row(
                   children: [
-                    const Icon(
-                      Icons.access_time,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
+                    const Icon(Icons.access_time, size: 16, color: Colors.grey),
                     const SizedBox(width: 4),
                     Text(
                       '$cookingTime min',
@@ -584,7 +600,10 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
                 ),
                 if (missingIngredients.isNotEmpty) ...[
                   const SizedBox(height: 12),
-                  _buildMissingIngredients(missingIngredients, recipe.getAvailableSubstitutes(availableIngredients)),
+                  _buildMissingIngredients(
+                    missingIngredients,
+                    recipe.getAvailableSubstitutes(availableIngredients),
+                  ),
                 ],
               ],
             ),
@@ -604,10 +623,7 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.red.withValues(alpha: 0.3),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.3), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -692,7 +708,8 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
     final detail = await provider.getRecipeDetail(recipe);
 
     // Close loading dialog
-    if (recipe.runtimeType.toString().contains('Spoonacular') && context.mounted) {
+    if (recipe.runtimeType.toString().contains('Spoonacular') &&
+        context.mounted) {
       Navigator.pop(context);
     }
 
@@ -747,7 +764,12 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
                 child: ListView(
                   controller: scrollController,
                   padding: const EdgeInsets.all(24),
-                  children: _buildDetailContent(context, detail, availableIngredients, missingIngredients),
+                  children: _buildDetailContent(
+                    context,
+                    detail,
+                    availableIngredients,
+                    missingIngredients,
+                  ),
                 ),
               ),
             ],
@@ -765,7 +787,9 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
     List<String> missingIngredients,
   ) {
     // Extract used ingredients
-    final used = List<String>.from(detail['usedIngredients'] ?? detail['ingredients'] ?? []);
+    final used = List<String>.from(
+      detail['usedIngredients'] ?? detail['ingredients'] ?? [],
+    );
     final imageUrl = detail['image'] ?? '';
 
     return [
@@ -838,7 +862,9 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
             ),
             child: Icon(
               detail['isFromAPI'] == true ? Icons.cloud : Icons.restaurant,
-              color: detail['isFromAPI'] == true ? Colors.purple : Colors.orange,
+              color: detail['isFromAPI'] == true
+                  ? Colors.purple
+                  : Colors.orange,
               size: 28,
             ),
           ),
@@ -917,12 +943,7 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
 
       // Available ingredients
       if (used.isNotEmpty) ...[
-        _buildIngredientSection(
-          context,
-          'Available / มีอยู่',
-          used,
-          true,
-        ),
+        _buildIngredientSection(context, 'Available / มีอยู่', used, true),
         const SizedBox(height: 16),
       ],
 
@@ -971,9 +992,7 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
         decoration: BoxDecoration(
           color: Colors.orange.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.orange.withValues(alpha: 0.2),
-          ),
+          border: Border.all(color: Colors.orange.withValues(alpha: 0.2)),
         ),
         child: Text(
           detail['instructions'] ?? 'No instructions available.',
@@ -1045,7 +1064,9 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
               Text(
                 '$title (${items.length})',
                 style: GoogleFonts.poppins(
-                  color: isAvailable ? Colors.green.shade300 : Colors.red.shade300,
+                  color: isAvailable
+                      ? Colors.green.shade300
+                      : Colors.red.shade300,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1061,7 +1082,9 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
                 children: [
                   Icon(
                     isAvailable ? Icons.check : Icons.close,
-                    color: isAvailable ? Colors.green.shade400 : Colors.red.shade400,
+                    color: isAvailable
+                        ? Colors.green.shade400
+                        : Colors.red.shade400,
                     size: 16,
                   ),
                   const SizedBox(width: 12),
@@ -1090,9 +1113,7 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1113,9 +1134,14 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
   }
 
   /// Add all missing ingredients to the grocery list
-  void _addMissingIngredients(BuildContext context, Map<String, dynamic> detail) {
+  void _addMissingIngredients(
+    BuildContext context,
+    Map<String, dynamic> detail,
+  ) {
     final provider = context.read<GroceryProvider>();
-    final missingIngredients = List<String>.from(detail['missedIngredients'] ?? detail['ingredients'] ?? []);
+    final missingIngredients = List<String>.from(
+      detail['missedIngredients'] ?? detail['ingredients'] ?? [],
+    );
 
     if (missingIngredients.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1142,9 +1168,10 @@ class _RecipeSuggestionScreenState extends State<RecipeSuggestionScreen> {
       );
 
       // Check if it already exists
-      final existing = provider.items.any((item) =>
-        item.name.toLowerCase() == ingredient.toLowerCase() &&
-        !item.isPurchased
+      final existing = provider.items.any(
+        (item) =>
+            item.name.toLowerCase() == ingredient.toLowerCase() &&
+            !item.isPurchased,
       );
 
       if (!existing) {

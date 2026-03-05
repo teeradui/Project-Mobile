@@ -74,8 +74,11 @@ class _GroceryPageState extends State<GroceryPage> {
                                 ))
                                 .map((entry) {
                                   final sortedItems = [...entry.value]
-                                    ..sort((a, b) =>
-                                        a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+                                    ..sort(
+                                      (a, b) => a.name.toLowerCase().compareTo(
+                                        b.name.toLowerCase(),
+                                      ),
+                                    );
                                   return _buildCategorySection(
                                     context,
                                     entry.key,
