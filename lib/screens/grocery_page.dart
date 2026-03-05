@@ -107,14 +107,11 @@ class _GroceryPageState extends State<GroceryPage> {
           Container(
             padding: const EdgeInsets.all(12.0),
             decoration: BoxDecoration(
-              color: primaryAmber.withValues(alpha: 0.2),
+              color: primaryAmber,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: primaryAmber.withValues(alpha: 0.4),
-                width: 1,
-              ),
+              
             ),
-            child: Icon(Icons.set_meal_rounded, color: primaryAmber, size: 28),
+            child: Icon(Icons.set_meal_rounded, color: Colors.white, size: 28),
           ),
           const SizedBox(width: 16),
 
