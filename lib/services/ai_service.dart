@@ -312,13 +312,13 @@ Return ONLY the JSON array, no explanation.
     );
 
     // English pattern: "2 kg chicken", "5 apples"
-    final englishPattern = RegExp(
-      r'(\d+(?:\.\d+)?)\s*(kg|g|lb|oz|liter|ml|cup|pcs|pieces|dozen|pack|bag|bottle|cans?)?\s*(?:of\s+)?([a-zA-Z]+)',
-      caseSensitive: false,
-    );
+   final englishPattern = RegExp(
+  r'(\d+(?:\.\d+)?)\s*(kg|g|lb|oz|liter|ml|cup|pcs|pieces|dozen|pack|bag|bottle|cans?)?\s*(?:of\s+)?([a-zA-Z]+(?:\s+[a-zA-Z]+)*)',
+  caseSensitive: false,
+);
 
     // Simple pattern: "chicken", "ไก่"
-    final simplePattern = RegExp(r'([a-zA-Zก-๙]+)', caseSensitive: false);
+    final simplePattern = RegExp(r'([a-zA-Zก-๙]+(?:\s+[a-zA-Zก-๙]+)*)', caseSensitive: false);
 
     // Try Thai pattern first
     final thaiMatches = thaiPattern.allMatches(input);

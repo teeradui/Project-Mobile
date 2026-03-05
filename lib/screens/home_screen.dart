@@ -111,26 +111,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
+           /*padding: const EdgeInsets.all(12),
+           decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [primaryAmber, primaryAmber.withOpacity(0.8)],
               ),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(
-              Icons.kitchen_rounded,
-              color: Colors.white,
-              size: 28,
+            child: Image.asset(
+              'assets/logo/7.png',
+              height: 28,
+              fit: BoxFit.contain,
             ),
-          ),
+          ),*/
+              width: 52,
+              height: 52,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [primaryAmber, primaryAmber.withOpacity(0.8)],
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Image.asset(
+                'assets/logo/7.png',
+                height: 36,
+                fit: BoxFit.contain,
+              ),
+            ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Smart Kitchen',
+                  'MealMate',
                   style: GoogleFonts.poppins(
                     color: forestGreen,
                     fontSize: 24,
@@ -138,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                 ),
                 Text(
-                  'Voice Recipe Assistant',
+                  'Suggestion Menu Assistant',
                   style: GoogleFonts.poppins(
                     color: forestGreen.withOpacity(0.6),
                     fontSize: 13,
@@ -184,7 +199,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(
-              Icons.shopping_basket_outlined,
+              Icons.set_meal_rounded,
               color: forestGreen,
               size: 30,
             ),
